@@ -367,7 +367,9 @@ class Step2AbsoluteContributions(AnalysisStep):
         return "absolute_contributions"
     
     def execute(self, p1_kpis: pd.DataFrame, p2_kpis: pd.DataFrame, 
-                p1_totals_kpis: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+                p1_totals_kpis: pd.DataFrame, p2_totals_kpis: pd.DataFrame,
+                p1_start_date: pd.Timestamp, p1_end_date: pd.Timestamp,
+                p2_start_date: pd.Timestamp, p2_end_date: pd.Timestamp) -> Dict[str, pd.DataFrame]:
         """
         Execute Step 2: Calculate absolute metric contributions
         
@@ -375,6 +377,10 @@ class Step2AbsoluteContributions(AnalysisStep):
             Dictionary of metric contributions
         """
         print("\n=== STEP 2: MIX CONTRIBUTION (ABSOLUTE METRICS) ===")
+        
+        # Get period names for column headers
+        p1_period_name = p1_start_date.strftime('%B %Y')
+        p2_period_name = p2_start_date.strftime('%B %Y')
         
         # Get all metrics with bridge_type "M" from KPI format
         absolute_metrics = []
@@ -393,31 +399,56 @@ class Step2AbsoluteContributions(AnalysisStep):
         
         absolute_contributions = {}
         
+        # Create combined DataFrame with multi-level columns
+        all_campaigns = p1_kpis.index.union(p2_kpis.index)
+        columns = []
+        data = {}
+        
         for metric in absolute_metrics:
             if metric in p1_kpis.columns and metric in p2_kpis.columns and not p1_totals_kpis.empty:
                 try:
+                    # Align data
+                    p1_aligned = p1_kpis[metric].reindex(all_campaigns, fill_value=0)
+                    p2_aligned = p2_kpis[metric].reindex(all_campaigns, fill_value=0)
+                    
+                    # Calculate contribution
                     contribution = self._calculate_absolute_metric_contribution(
-                        p1_kpis[metric],
-                        p2_kpis[metric],
+                        p1_aligned,
+                        p2_aligned,
                         p1_totals_kpis.loc['TOTAL', metric]
                     )
                     
-                    # Apply formatting based on KPI configuration
+                    # Get display name and format configuration
                     display_name = self.config.get_kpi_display_name(metric)
-                    if display_name in self.config.kpi_format:
-                        formatted_contribution = contribution.apply(
-                            lambda x: self.config.format_contribution_value(x, display_name)
-                        )
-                        contribution_df = pd.DataFrame({
-                            'Contribution (Raw)': contribution,
-                            'Contribution (Formatted)': formatted_contribution
-                        })
+                    kpi_format = self.config.kpi_format.get(display_name, {})
+                    
+                    # Add columns for this metric
+                    columns.extend([
+                        (metric, p1_period_name),
+                        (metric, p2_period_name),
+                        (metric, 'Net Change'),
+                        (metric, 'Contribution (BPS)')
+                    ])
+                    
+                    # Format values
+                    if 'formats' in kpi_format:
+                        p1_fmt = p1_aligned.apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('period_values', {'type': 'decimal', 'decimals': 2})))
+                        p2_fmt = p2_aligned.apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('period_values', {'type': 'decimal', 'decimals': 2})))
+                        net_change_fmt = (p2_aligned - p1_aligned).apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('net_change', {'type': 'decimal', 'decimals': 2})))
+                        contribution_fmt = contribution.apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('contribution', {'type': 'bps'})))
                     else:
-                        contribution_df = contribution.to_frame()
+                        p1_fmt = p1_aligned
+                        p2_fmt = p2_aligned
+                        net_change_fmt = p2_aligned - p1_aligned
+                        contribution_fmt = contribution.apply(lambda x: f"{x:+.0f}")
                     
-                    absolute_contributions[metric] = contribution_df
+                    # Store data
+                    data[(metric, p1_period_name)] = p1_fmt
+                    data[(metric, p2_period_name)] = p2_fmt
+                    data[(metric, 'Net Change')] = net_change_fmt
+                    data[(metric, 'Contribution (BPS)')] = contribution_fmt
                     
-                    # Don't save individual metric files - only save combined at the end
+                    absolute_contributions[metric] = contribution
                     print(f"✓ Calculated {metric} contribution")
                     
                 except Exception as e:
@@ -425,19 +456,47 @@ class Step2AbsoluteContributions(AnalysisStep):
             else:
                 print(f"✗ Skipping {metric} - missing data or empty totals")
         
-        # Save combined absolute contributions
-        if absolute_contributions:
-            combined_data = {}
-            for metric, contrib_df in absolute_contributions.items():
-                if 'Contribution (Raw)' in contrib_df.columns:
-                    combined_data[metric] = contrib_df['Contribution (Raw)']
-                else:
-                    combined_data[metric] = contrib_df.iloc[:, 0]
+        # Create multi-index DataFrame
+        if data:
+            columns = pd.MultiIndex.from_tuples(columns)
+            combined_df = pd.DataFrame(data, index=all_campaigns)
+            combined_df = combined_df.reindex(columns=columns)
             
-            combined_df = pd.DataFrame(combined_data)
-            description = "Combined absolute metric contributions - all absolute metrics in one table showing campaign-level contributions to period-over-period changes"
+            # Add totals row
+            totals_row = {}
+            for metric in absolute_metrics:
+                if metric in p1_totals_kpis.columns and metric in p2_totals_kpis.columns:
+                    p1_total = p1_totals_kpis.loc['TOTAL', metric]
+                    p2_total = p2_totals_kpis.loc['TOTAL', metric]
+                    net_change = p2_total - p1_total
+                    contribution = (net_change / p1_total * 10000) if p1_total != 0 else 0
+                    
+                    display_name = self.config.get_kpi_display_name(metric)
+                    kpi_format = self.config.kpi_format.get(display_name, {})
+                    
+                    if 'formats' in kpi_format:
+                        p1_total_fmt = self.config.format_value(p1_total, kpi_format['formats'].get('period_values', {'type': 'decimal', 'decimals': 2}))
+                        p2_total_fmt = self.config.format_value(p2_total, kpi_format['formats'].get('period_values', {'type': 'decimal', 'decimals': 2}))
+                        net_change_fmt = self.config.format_value(net_change, kpi_format['formats'].get('net_change', {'type': 'decimal', 'decimals': 2}))
+                        contribution_fmt = self.config.format_value(contribution, kpi_format['formats'].get('contribution', {'type': 'bps'}))
+                    else:
+                        p1_total_fmt = p1_total
+                        p2_total_fmt = p2_total
+                        net_change_fmt = net_change
+                        contribution_fmt = f"{contribution:+.0f}"
+                    
+                    totals_row[(metric, p1_period_name)] = p1_total_fmt
+                    totals_row[(metric, p2_period_name)] = p2_total_fmt
+                    totals_row[(metric, 'Net Change')] = net_change_fmt
+                    totals_row[(metric, 'Contribution (BPS)')] = contribution_fmt
+            
+            # Add totals row
+            totals_series = pd.Series(totals_row, name='TOTAL')
+            combined_df = pd.concat([combined_df, totals_series.to_frame().T])
+            
+            description = f"Absolute metric contributions - {p1_period_name} vs {p2_period_name} - showing campaign-level contributions to period-over-period changes"
             self._save_results(combined_df, 'all_absolute_metric_contributions.csv', description)
-            print(f"✓ Saved combined absolute contributions")
+            print(f"✓ Saved absolute contributions in period comparison format")
         
         return absolute_contributions
     
@@ -463,7 +522,9 @@ class Step3MixRateContributions(AnalysisStep):
         return "mix_rate_contributions"
     
     def execute(self, p1_kpis: pd.DataFrame, p2_kpis: pd.DataFrame, 
-                p2_totals_kpis: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+                p2_totals_kpis: pd.DataFrame, p1_totals_kpis: pd.DataFrame,
+                p1_start_date: pd.Timestamp, p1_end_date: pd.Timestamp,
+                p2_start_date: pd.Timestamp, p2_end_date: pd.Timestamp) -> Dict[str, pd.DataFrame]:
         """
         Execute Step 3: Calculate mix rate contributions
         
@@ -471,6 +532,10 @@ class Step3MixRateContributions(AnalysisStep):
             Dictionary of mix rate contributions
         """
         print("\n=== STEP 3: MIX RATE CONTRIBUTION (CALCULATED KPIS) ===")
+        
+        # Get period names for column headers
+        p1_period_name = p1_start_date.strftime('%B %Y')
+        p2_period_name = p2_start_date.strftime('%B %Y')
         
         # Get all metrics with bridge_type "MR" from KPI format
         mix_rate_kpis = []
@@ -502,6 +567,11 @@ class Step3MixRateContributions(AnalysisStep):
         
         mix_rate_contributions = {}
         
+        # Create combined DataFrame with multi-level columns
+        all_campaigns = p1_kpis.index.union(p2_kpis.index)
+        columns = []
+        data = {}
+        
         for kpi in mix_rate_kpis:
             if kpi not in kpi_config:
                 print(f"✗ Skipping {kpi} - no configuration found")
@@ -516,51 +586,153 @@ class Step3MixRateContributions(AnalysisStep):
                 mix_driver = config['mix_driver']
                 is_percentage = config['is_percentage']
                 
+                # Align data
+                p1_aligned = p1_kpis.reindex(all_campaigns, fill_value=0)
+                p2_aligned = p2_kpis.reindex(all_campaigns, fill_value=0)
+                
                 # Calculate mix shares for each period
-                p1_total_mix = p1_kpis[mix_driver].sum()
-                p2_total_mix = p2_kpis[mix_driver].sum()
-                p1_mix = p1_kpis[mix_driver] / p1_total_mix if p1_total_mix > 0 else pd.Series(0, index=p1_kpis.index)
-                p2_mix = p2_kpis[mix_driver] / p2_total_mix if p2_total_mix > 0 else pd.Series(0, index=p2_kpis.index)
+                p1_total_mix = p1_aligned[mix_driver].sum()
+                p2_total_mix = p2_aligned[mix_driver].sum()
+                p1_mix = p1_aligned[mix_driver] / p1_total_mix if p1_total_mix > 0 else pd.Series(0, index=all_campaigns)
+                p2_mix = p2_aligned[mix_driver] / p2_total_mix if p2_total_mix > 0 else pd.Series(0, index=all_campaigns)
                 
                 # Calculate the overall KPI value for P2 (weighted average)
-                p2_total_kpi = self._calculate_weighted_average_kpi(kpi, p2_kpis)
+                p2_total_kpi = self._calculate_weighted_average_kpi(kpi, p2_aligned)
                 
                 # Calculate mix rate contribution
                 contributions = self._calculate_mix_rate_contribution(
-                    p1_kpi_values=p1_kpis[kpi],
-                    p2_kpi_values=p2_kpis[kpi],
+                    p1_kpi_values=p1_aligned[kpi],
+                    p2_kpi_values=p2_aligned[kpi],
                     p1_mix_shares=p1_mix,
                     p2_mix_shares=p2_mix,
                     p2_total_kpi_value=p2_total_kpi,
                     is_percentage_metric=is_percentage
                 )
                 
-                # Add MoM change columns with proper formatting
-                self._add_mom_change_formatting(contributions, kpi, p1_kpis, p2_kpis, is_percentage)
+                # Get display name and format configuration
+                display_name = self.config.get_kpi_display_name(kpi)
+                kpi_format = self.config.kpi_format.get(display_name, {})
+                
+                # Determine contribution label
+                uses_bps = is_percentage or (
+                    'formats' in kpi_format 
+                    and 'contribution' in kpi_format['formats']
+                    and kpi_format['formats']['contribution'].get('type') == 'bps'
+                )
+                contribution_label = 'Contribution (BPS)' if uses_bps else 'Contribution'
+                
+                # Add columns for this KPI
+                columns.extend([
+                    (kpi, p1_period_name),
+                    (kpi, p2_period_name),
+                    (kpi, 'Net Change'),
+                    (kpi, 'Mix Impact'),
+                    (kpi, 'Rate Impact'),
+                    (kpi, contribution_label)
+                ])
+                
+                # Format values
+                net_change = p2_aligned[kpi] - p1_aligned[kpi]
+                
+                if 'formats' in kpi_format:
+                    p1_fmt = p1_aligned[kpi].apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('period_values', {'type': 'decimal', 'decimals': 2})))
+                    p2_fmt = p2_aligned[kpi].apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('period_values', {'type': 'decimal', 'decimals': 2})))
+                    net_change_fmt = net_change.apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('net_change', {'type': 'decimal', 'decimals': 2})))
+                    mix_impact_fmt = contributions['Mix Impact'].apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('contribution', {'type': 'bps'})))
+                    rate_impact_fmt = contributions['Rate Impact'].apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('contribution', {'type': 'bps'})))
+                    contribution_fmt = contributions['Total Contribution'].apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('contribution', {'type': 'bps'})))
+                else:
+                    p1_fmt = p1_aligned[kpi]
+                    p2_fmt = p2_aligned[kpi]
+                    net_change_fmt = net_change
+                    if uses_bps:
+                        mix_impact_fmt = contributions['Mix Impact'].apply(lambda x: f"{x:+.0f}")
+                        rate_impact_fmt = contributions['Rate Impact'].apply(lambda x: f"{x:+.0f}")
+                        contribution_fmt = contributions['Total Contribution'].apply(lambda x: f"{x:+.0f}")
+                    else:
+                        mix_impact_fmt = contributions['Mix Impact'].apply(lambda x: f"{x:+.2f}")
+                        rate_impact_fmt = contributions['Rate Impact'].apply(lambda x: f"{x:+.2f}")
+                        contribution_fmt = contributions['Total Contribution'].apply(lambda x: f"{x:+.2f}")
+                
+                # Store data
+                data[(kpi, p1_period_name)] = p1_fmt
+                data[(kpi, p2_period_name)] = p2_fmt
+                data[(kpi, 'Net Change')] = net_change_fmt
+                data[(kpi, 'Mix Impact')] = mix_impact_fmt
+                data[(kpi, 'Rate Impact')] = rate_impact_fmt
+                data[(kpi, contribution_label)] = contribution_fmt
                 
                 mix_rate_contributions[kpi] = contributions
-                
-                # Don't save individual KPI files - will save combined at the end
                 print(f"✓ Calculated {kpi} mix/rate contribution")
                 
             except Exception as e:
                 print(f"✗ Error calculating {kpi} mix/rate contribution: {e}")
         
-        # Save combined mix/rate contributions
-        if mix_rate_contributions:
-            # Create a combined DataFrame with all KPIs
-            combined_sections = []
-            for kpi, contrib_df in mix_rate_contributions.items():
-                # Add KPI identifier column
-                kpi_df = contrib_df.copy()
-                kpi_df.insert(0, 'KPI', kpi)
-                combined_sections.append(kpi_df)
+        # Create multi-index DataFrame
+        if data:
+            columns = pd.MultiIndex.from_tuples(columns)
+            combined_df = pd.DataFrame(data, index=all_campaigns)
+            combined_df = combined_df.reindex(columns=columns)
             
-            if combined_sections:
-                combined_df = pd.concat(combined_sections, ignore_index=False)
-                description = "Combined Mix/Rate contributions for all KPIs - shows Mix Impact, Rate Impact, and Total Contribution for each campaign across all calculated KPIs"
-                self._save_results(combined_df, 'all_mix_rate_contributions.csv', description)
-                print(f"✓ Saved combined mix/rate contributions")
+            # Add totals row
+            totals_row = {}
+            for kpi in mix_rate_kpis:
+                if kpi in p1_totals_kpis.columns and kpi in p2_totals_kpis.columns and kpi in mix_rate_contributions:
+                    p1_total = p1_totals_kpis.loc['TOTAL', kpi]
+                    p2_total = p2_totals_kpis.loc['TOTAL', kpi]
+                    net_change = p2_total - p1_total
+                    
+                    # Sum contributions
+                    total_mix_impact = mix_rate_contributions[kpi]['Mix Impact'].sum()
+                    total_rate_impact = mix_rate_contributions[kpi]['Rate Impact'].sum()
+                    total_contribution = mix_rate_contributions[kpi]['Total Contribution'].sum()
+                    
+                    display_name = self.config.get_kpi_display_name(kpi)
+                    kpi_format_config = self.config.kpi_format.get(display_name, {})
+                    
+                    # Check if this metric uses basis points
+                    is_percentage = kpi_config.get(kpi, {}).get('is_percentage', False)
+                    uses_bps = is_percentage or (
+                        'formats' in kpi_format_config 
+                        and 'contribution' in kpi_format_config['formats']
+                        and kpi_format_config['formats']['contribution'].get('type') == 'bps'
+                    )
+                    contribution_label = 'Contribution (BPS)' if uses_bps else 'Contribution'
+                    
+                    if 'formats' in kpi_format_config:
+                        p1_total_fmt = self.config.format_value(p1_total, kpi_format_config['formats'].get('period_values', {'type': 'decimal', 'decimals': 2}))
+                        p2_total_fmt = self.config.format_value(p2_total, kpi_format_config['formats'].get('period_values', {'type': 'decimal', 'decimals': 2}))
+                        net_change_fmt = self.config.format_value(net_change, kpi_format_config['formats'].get('net_change', {'type': 'decimal', 'decimals': 2}))
+                        mix_impact_fmt = self.config.format_value(total_mix_impact, kpi_format_config['formats'].get('contribution', {'type': 'bps'}))
+                        rate_impact_fmt = self.config.format_value(total_rate_impact, kpi_format_config['formats'].get('contribution', {'type': 'bps'}))
+                        contribution_fmt = self.config.format_value(total_contribution, kpi_format_config['formats'].get('contribution', {'type': 'bps'}))
+                    else:
+                        p1_total_fmt = p1_total
+                        p2_total_fmt = p2_total
+                        net_change_fmt = net_change
+                        if uses_bps:
+                            mix_impact_fmt = f"{total_mix_impact:+.0f}"
+                            rate_impact_fmt = f"{total_rate_impact:+.0f}"
+                            contribution_fmt = f"{total_contribution:+.0f}"
+                        else:
+                            mix_impact_fmt = f"{total_mix_impact:+.2f}"
+                            rate_impact_fmt = f"{total_rate_impact:+.2f}"
+                            contribution_fmt = f"{total_contribution:+.2f}"
+                    
+                    totals_row[(kpi, p1_period_name)] = p1_total_fmt
+                    totals_row[(kpi, p2_period_name)] = p2_total_fmt
+                    totals_row[(kpi, 'Net Change')] = net_change_fmt
+                    totals_row[(kpi, 'Mix Impact')] = mix_impact_fmt
+                    totals_row[(kpi, 'Rate Impact')] = rate_impact_fmt
+                    totals_row[(kpi, contribution_label)] = contribution_fmt
+            
+            # Add totals row
+            totals_series = pd.Series(totals_row, name='TOTAL')
+            combined_df = pd.concat([combined_df, totals_series.to_frame().T])
+            
+            description = f"Mix/Rate contributions - {p1_period_name} vs {p2_period_name} - showing Mix Impact, Rate Impact, and Total Contribution for calculated KPIs"
+            self._save_results(combined_df, 'all_mix_rate_contributions.csv', description)
+            print(f"✓ Saved mix/rate contributions in period comparison format")
         
         return mix_rate_contributions
     
@@ -647,151 +819,84 @@ class Step3MixRateContributions(AnalysisStep):
 
 
 class Step4AcosRoasInfinityHandling(AnalysisStep):
-    """Step 4: Handle ACoS/ROAS infinity cases and generate final contributions"""
+    """Step 4: Handle infinity values in ACoS and ROAS contributions"""
     
     def get_step_name(self) -> str:
         return "acos_roas_final"
     
-    def execute(self, p1_kpis: pd.DataFrame, p2_kpis: pd.DataFrame, 
-                p1_totals_kpis: pd.DataFrame, p2_totals_kpis: pd.DataFrame) -> Optional[pd.DataFrame]:
+    def execute(self, mix_rate_contributions: Dict[str, pd.DataFrame],
+                absolute_contributions: Dict[str, pd.DataFrame],
+                p1_start_date: pd.Timestamp, p1_end_date: pd.Timestamp,
+                p2_start_date: pd.Timestamp, p2_end_date: pd.Timestamp) -> Dict[str, pd.DataFrame]:
         """
-        Execute Step 4: Apply ACoS/ROAS infinity handling
+        Execute Step 4: Handle infinity values in ACoS and ROAS contributions
         
         Returns:
-            DataFrame with final ACoS/ROAS contributions
+            Dictionary of final ACoS/ROAS contributions
         """
         print("\n=== STEP 4: ACOS/ROAS INFINITY HANDLING ===")
         
-        # Get all metrics with bridge_type "MR+I" from KPI format
-        infinity_handling_kpis = []
-        for kpi_name, config in self.config.kpi_format.items():
-            if config.get('bridge_type') == 'MR+I':
-                internal_name = self.config.get_kpi_internal_name(kpi_name)
-                infinity_handling_kpis.append(internal_name)
+        # Define infinity handling KPIs based on what's available in mix_rate_contributions
+        infinity_kpis = [kpi for kpi in ['ACoS', 'ROAS'] 
+                        if kpi in mix_rate_contributions]
         
-        # Fallback to ACoS if KPI_FORMAT is empty or no MR+I found
-        if not infinity_handling_kpis:
-            infinity_handling_kpis = ['ACoS']
-            print("No MR+I KPIs found in format config, defaulting to ACoS")
+        print(f"Processing infinity handling for: {infinity_kpis}")
         
-        print(f"Processing infinity handling for: {infinity_handling_kpis}")
+        # Get period names for column headers
+        p1_period_name = f"{p1_start_date.strftime('%B %Y')}"
+        p2_period_name = f"{p2_start_date.strftime('%B %Y')}"
         
-        try:
-            # Calculate spend mix shares
-            p1_total_spend = p1_kpis['Spend'].sum()
-            p2_total_spend = p2_kpis['Spend'].sum()
-            p1_spend_mix = p1_kpis['Spend'] / p1_total_spend if p1_total_spend > 0 else pd.Series(0, index=p1_kpis.index)
-            p2_spend_mix = p2_kpis['Spend'] / p2_total_spend if p2_total_spend > 0 else pd.Series(0, index=p2_kpis.index)
+        # Prepare results dictionary
+        final_contributions = {}
+        
+        # Process each KPI that needs infinity handling
+        for kpi in infinity_kpis:
+            if kpi in mix_rate_contributions:
+                # Get the DataFrame for this KPI
+                kpi_df = mix_rate_contributions[kpi]
+                
+                # Get the Total Contribution column
+                if 'Total Contribution' in kpi_df.columns:
+                    # Get contributions from mix/rate
+                    kpi_contributions = kpi_df['Total Contribution'].copy()
+                    
+                    # Handle infinity values
+                    kpi_contributions = kpi_contributions.replace([np.inf, -np.inf], 0)
+                    kpi_contributions = kpi_contributions.fillna(0)
+                    
+                    final_contributions[kpi] = kpi_contributions
+        
+        # Create output with contributions
+        if final_contributions:
+            # Start with campaign names
+            all_campaigns = list(mix_rate_contributions[infinity_kpis[0]].index)
             
-            # Apply ACoS/ROAS bridge with infinity handling
-            acos_roas_bridge = self._calculate_acos_roas_bridge_contribution(
-                p1_kpis['Total Ad Sales'], p1_kpis['Spend'],
-                p2_kpis['Total Ad Sales'], p2_kpis['Spend'],
-                p1_spend_mix, p2_spend_mix,
-                p1_totals_kpis.loc['TOTAL', 'Total Ad Sales'], p1_totals_kpis.loc['TOTAL', 'Spend'],
-                p2_totals_kpis.loc['TOTAL', 'Total Ad Sales'], p2_totals_kpis.loc['TOTAL', 'Spend']
-            )
+            # Create simple output DataFrame
+            result_df = pd.DataFrame(index=all_campaigns)
             
-            # Apply formatting based on KPI configuration
-            formatted_bridge = acos_roas_bridge.copy()
-            
-            # Format ACoS contributions
-            if 'ACoS' in infinity_handling_kpis:
-                acos_display_name = self.config.get_kpi_display_name('ACoS')
-                if acos_display_name in self.config.kpi_format:
-                    formatted_bridge['ACoS_Contribution_BPS (Formatted)'] = acos_roas_bridge['ACoS_Contribution_BPS'].apply(
-                        lambda x: self.config.format_contribution_value(x, acos_display_name)
-                    )
-            
-            # Format ROAS contributions
-            roas_display_name = self.config.get_kpi_display_name('ROAS')
-            if roas_display_name in self.config.kpi_format:
-                formatted_bridge['ROAS_Contribution (Formatted)'] = acos_roas_bridge['ROAS_Contribution'].apply(
-                    lambda x: self.config.format_contribution_value(x, roas_display_name)
+            # Add ACoS contributions if available
+            if 'ACoS' in final_contributions:
+                result_df['ACoS_Contribution_BPS'] = final_contributions['ACoS']
+                result_df['ACoS_Contribution_BPS (Formatted)'] = final_contributions['ACoS'].apply(
+                    lambda x: f"{x:+.0f}" if pd.notna(x) and x != 0 else "-0" if x == 0 else ''
                 )
             
-            # Save the final ACoS/ROAS contributions
-            description = "Final ACoS/ROAS contributions with infinity handling applied - handles cases where campaigns have zero sales or spend that would cause infinite ACoS values"
-            self._save_results(formatted_bridge, 'acos_roas_final_contributions.csv', description)
+            # Add ROAS contributions if available
+            if 'ROAS' in final_contributions:
+                result_df['ROAS_Contribution'] = final_contributions['ROAS']
+                result_df['ROAS_Contribution (Formatted)'] = final_contributions['ROAS'].apply(
+                    lambda x: f"${x:+.2f}" if pd.notna(x) and x != 0 else "$0.00" if x == 0 else ''
+                )
+            
+            # Save results
+            description = f"ACoS/ROAS Final Contributions - {p1_period_name} vs {p2_period_name} - with infinity handling applied"
+            self._save_results(result_df, 'acos_roas_final_contributions.csv', description)
             print(f"✓ Applied infinity handling and saved final ACoS/ROAS contributions")
             
-            return formatted_bridge
-            
-        except Exception as e:
-            print(f"✗ Error in ACoS/ROAS infinity handling: {e}")
-            return None
-    
-    def _calculate_acos_roas_bridge_contribution(self, p1_sales_series: pd.Series, p1_spend_series: pd.Series,
-                                               p2_sales_series: pd.Series, p2_spend_series: pd.Series,
-                                               p1_spend_mix_series: pd.Series, p2_spend_mix_series: pd.Series,
-                                               p1_total_sales: float, p1_total_spend: float,
-                                               p2_total_sales: float, p2_total_spend: float) -> pd.DataFrame:
-        """
-        Calculates ACoS and ROAS contributions, including infinity error handling for ACoS
-        by transforming ROAS contributions.
-        """
-        # Align all series to ensure consistent indexing
-        df = pd.DataFrame({
-            'P1_Sales': p1_sales_series,
-            'P1_Spend': p1_spend_series,
-            'P2_Sales': p2_sales_series,
-            'P2_Spend': p2_spend_series,
-            'P1_Spend_Mix': p1_spend_mix_series,
-            'P2_Spend_Mix': p2_spend_mix_series
-        }).fillna(0)
-
-        # Calculate campaign-level metrics
-        df['P1_ACoS'] = np.where(df['P1_Sales'] > 0, df['P1_Spend'] / df['P1_Sales'], np.nan)
-        df['P2_ACoS'] = np.where(df['P2_Sales'] > 0, df['P2_Spend'] / df['P2_Sales'], np.nan)
-        df['P1_ROAS'] = np.where(df['P1_Spend'] > 0, df['P1_Sales'] / df['P1_Spend'], 0)
-        df['P2_ROAS'] = np.where(df['P2_Spend'] > 0, df['P2_Sales'] / df['P2_Spend'], 0)
-
-        # Calculate Total KPIs
-        P1_Total_ACoS = p1_total_spend / p1_total_sales if p1_total_sales > 0 else np.nan
-        P2_Total_ACoS = p2_total_spend / p2_total_sales if p2_total_sales > 0 else np.nan
-        P1_Total_ROAS = p1_total_sales / p1_total_spend if p1_total_spend > 0 else 0
-        P2_Total_ROAS = p2_total_sales / p2_total_spend if p2_total_spend > 0 else 0
-        
-        # --- ROAS Bridge ---
-        step3 = Step3MixRateContributions(self.config, self.output_dir)
-        roas_contributions_df = step3._calculate_mix_rate_contribution(
-            df['P1_ROAS'], df['P2_ROAS'],
-            df['P1_Spend_Mix'], df['P2_Spend_Mix'],
-            P2_Total_ROAS,
-            is_percentage_metric=False
-        )
-        df['ROAS_Contribution'] = roas_contributions_df['Total Contribution']
-
-        # --- ACoS Bridge ---
-        P2_Total_ACoS_for_calc = P2_Total_ACoS if not pd.isna(P2_Total_ACoS) else 0
-        acos_contributions_std_df = step3._calculate_mix_rate_contribution(
-            df['P1_ACoS'].fillna(0),
-            df['P2_ACoS'].fillna(0),
-            df['P1_Spend_Mix'], df['P2_Spend_Mix'],
-            P2_Total_ACoS_for_calc,
-            is_percentage_metric=True
-        )
-        df['ACoS_Contribution_BPS'] = acos_contributions_std_df['Total Contribution']
-
-        # Apply transformation where ACoS might be infinite
-        infinity_condition = df['P1_ACoS'].isna() | df['P2_ACoS'].isna()
-        
-        total_overall_roas_change = P2_Total_ROAS - P1_Total_ROAS
-        
-        if pd.isna(P1_Total_ACoS) or pd.isna(P2_Total_ACoS):
-            total_overall_acos_change_bps = 0
+            return final_contributions
         else:
-            total_overall_acos_change_bps = (P2_Total_ACoS - P1_Total_ACoS) * 10000
-
-        if total_overall_roas_change != 0:
-            df.loc[infinity_condition, 'ACoS_Contribution_BPS'] = \
-                (df.loc[infinity_condition, 'ROAS_Contribution'] / total_overall_roas_change) * total_overall_acos_change_bps
-        elif total_overall_roas_change == 0 and total_overall_acos_change_bps != 0:
-            print("Warning: Total ROAS change is 0, but ACoS change is not. ACoS transformation for infinity cases may be inaccurate.")
-        elif total_overall_roas_change == 0 and total_overall_acos_change_bps == 0:
-             df.loc[infinity_condition, 'ACoS_Contribution_BPS'] = 0
-             
-        return df[['ACoS_Contribution_BPS', 'ROAS_Contribution']] 
+            print("✗ No ACoS or ROAS contributions found to process")
+            return {}
 
 
 class SummaryReportGenerator(AnalysisStep):
