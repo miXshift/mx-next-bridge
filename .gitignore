@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vBridge output files
+vBridge/output/*
+!vBridge/output/README.md

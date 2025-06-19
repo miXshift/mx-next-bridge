@@ -10,7 +10,12 @@
     "start": "NODE_ENV=production node dist/server.js",
     "build:server": "tsc --project tsconfig.server.json",
     "lint": "next lint",
-    "prebuild": "npm run build:server"
+    "prebuild": "npm run build:server",
+    "vbridge:clean": "cd vBridge && find output -mindepth 1 -name '*.md' -prune -o -type f -delete && find output -mindepth 1 -type d -empty -delete",
+    "vbridge:run": "cd vBridge && ./venv/bin/python3 scripts/vBridge.py",
+    "vbridge:install": "cd vBridge && ./venv/bin/pip install -r requirements.txt",
+    "vbridge:full": "npm run vbridge:clean && npm run vbridge:run"
+
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
