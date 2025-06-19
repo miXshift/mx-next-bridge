@@ -76,11 +76,8 @@ class ConfigManager:
             else:
                 return f"-${abs(value):,.{decimals}f}"
         elif format_type == 'percentage':
-            # Standard percentage with 1 decimal place (e.g., "13.1%")
-            return f"{value * 100:.1f}%"
-        elif format_type == 'percentage_precise':
-            # Precise percentage with 2 decimal places (e.g., "12.45%")
-            return f"{value * 100:.2f}%"
+            # Percentage as decimal format with 12 decimal places (e.g., 0.131000000000)
+            return f"{value:.12f}"
         elif format_type == 'bps':
             decimals = format_spec.get('decimals', 0)
             # Don't append BPS to the value, it will be in the column header

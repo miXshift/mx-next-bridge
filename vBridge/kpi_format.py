@@ -25,7 +25,7 @@
         "change_type": "pts_change",
         "formats": {
             "period_values": {"type": "percentage"},
-            "pts_change": {"type": "percentage_precise"},
+            "pts_change": {"type": "percentage"},
             "percent_change": {"type": "percentage"},
             "contribution": {"type": "bps"}
         }
@@ -46,7 +46,7 @@
         "change_type": "pts_change",
         "formats": {
             "period_values": {"type": "percentage"},
-            "pts_change": {"type": "percentage_precise"},
+            "pts_change": {"type": "percentage"},
             "percent_change": {"type": "percentage"},
             "contribution": {"type": "bps"}
         }
@@ -76,8 +76,8 @@
         "calc_from": "Total Click Through Rate",
         "change_type": "pts_change",
         "formats": {
-            "period_values": {"type": "percentage_precise"},
-            "pts_change": {"type": "percentage_precise"},
+            "period_values": {"type": "percentage"},
+            "pts_change": {"type": "percentage"},
             "percent_change": {"type": "percentage"},
             "contribution": {"type": "bps"}
         }
