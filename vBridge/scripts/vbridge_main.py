@@ -105,16 +105,27 @@ class VBridge:
             return {}
         
         # Step 2: Calculate all absolute metric contributions
-        absolute_contributions = self.step2.execute(p1_kpis, p2_kpis, p1_totals_kpis)
+        absolute_contributions = self.step2.execute(
+            p1_kpis, p2_kpis, p1_totals_kpis, p2_totals_kpis,
+            p1_start, p1_end, p2_start, p2_end
+        )
         
         # Step 3: Calculate all mix rate contributions
-        mix_rate_contributions = self.step3.execute(p1_kpis, p2_kpis, p2_totals_kpis)
+        mix_rate_contributions = self.step3.execute(
+            p1_kpis, p2_kpis, p2_totals_kpis, p1_totals_kpis,
+            p1_start, p1_end, p2_start, p2_end
+        )
         
         # Step 4: Apply ACoS/ROAS infinity handling
-        final_acos_roas = self.step4.execute(p1_kpis, p2_kpis, p1_totals_kpis, p2_totals_kpis)
+        final_acos_roas = self.step4.execute(
+            mix_rate_contributions, absolute_contributions,
+            p1_start, p1_end, p2_start, p2_end
+        )
         
         # Generate summary report
-        self.summary_generator.execute(p1_kpis, p2_kpis, p1_totals_kpis, p2_totals_kpis)
+        self.summary_generator.execute(
+            p1_kpis, p2_kpis, p1_totals_kpis, p2_totals_kpis
+        )
         
         # Save unified output if enabled
         if self.unified_output and self.unified_collector:
@@ -165,8 +176,8 @@ class VBridge:
 
 # Example usage and main execution
 if __name__ == '__main__':
-    # Initialize VBridge with unified output enabled
-    vbridge = VBridge(output_dir='output', unified_output=True)
+    # Initialize VBridge with unified output disabled to generate individual files
+    vbridge = VBridge(output_dir='output', unified_output=False)
     
     # Define file path and date ranges for P1 and P2
     csv_file_path = 'Hydrapak YTD - campaign.csv'
