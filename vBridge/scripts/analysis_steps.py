@@ -146,29 +146,35 @@ class Step1KPICalculation(AnalysisStep):
         p1_period_name = p1_start_date.strftime('%B %Y')
         p2_period_name = p2_start_date.strftime('%B %Y')
         
-        # Save P1 campaign KPIs
-        if not p1_kpis.empty:
-            description = f"Period 1 ({p1_period}) campaign-level KPIs - all 14 calculated KPIs for each campaign"
-            self._save_results(p1_kpis, 'p1_campaign_kpis.csv', description)
-            print(f"✓ Saved P1 campaign KPIs")
+        # Skip saving individual P1/P2 campaign and totals KPI files
+        # Data is still calculated and passed to subsequent steps
+        # Uncomment the sections below if you need these individual files
         
-        # Save P2 campaign KPIs
-        if not p2_kpis.empty:
-            description = f"Period 2 ({p2_period}) campaign-level KPIs - all 14 calculated KPIs for each campaign"
-            self._save_results(p2_kpis, 'p2_campaign_kpis.csv', description)
-            print(f"✓ Saved P2 campaign KPIs")
+        # # Save P1 campaign KPIs
+        # if not p1_kpis.empty:
+        #     description = f"Period 1 ({p1_period}) campaign-level KPIs - all 14 calculated KPIs for each campaign"
+        #     self._save_results(p1_kpis, 'p1_campaign_kpis.csv', description)
+        #     print(f"✓ Saved P1 campaign KPIs")
+        # 
+        # # Save P2 campaign KPIs
+        # if not p2_kpis.empty:
+        #     description = f"Period 2 ({p2_period}) campaign-level KPIs - all 14 calculated KPIs for each campaign"
+        #     self._save_results(p2_kpis, 'p2_campaign_kpis.csv', description)
+        #     print(f"✓ Saved P2 campaign KPIs")
+        # 
+        # # Save P1 totals
+        # if not p1_totals_kpis.empty:
+        #     description = f"Period 1 ({p1_period}) total/aggregate KPIs - overall performance across all campaigns"
+        #     self._save_results(p1_totals_kpis, 'p1_totals_kpis.csv', description)
+        #     print(f"✓ Saved P1 totals")
+        # 
+        # # Save P2 totals
+        # if not p2_totals_kpis.empty:
+        #     description = f"Period 2 ({p2_period}) total/aggregate KPIs - overall performance across all campaigns"
+        #     self._save_results(p2_totals_kpis, 'p2_totals_kpis.csv', description)
+        #     print(f"✓ Saved P2 totals")
         
-        # Save P1 totals
-        if not p1_totals_kpis.empty:
-            description = f"Period 1 ({p1_period}) total/aggregate KPIs - overall performance across all campaigns"
-            self._save_results(p1_totals_kpis, 'p1_totals_kpis.csv', description)
-            print(f"✓ Saved P1 totals")
-        
-        # Save P2 totals
-        if not p2_totals_kpis.empty:
-            description = f"Period 2 ({p2_period}) total/aggregate KPIs - overall performance across all campaigns"
-            self._save_results(p2_totals_kpis, 'p2_totals_kpis.csv', description)
-            print(f"✓ Saved P2 totals")
+        print(f"✓ Skipped individual KPI files (data still available for subsequent steps)")
         
         # Create a combined comparison file
         if not p1_kpis.empty and not p2_kpis.empty:
