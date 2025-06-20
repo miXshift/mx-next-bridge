@@ -99,7 +99,7 @@
             "period_values": {"type": "currency"},
             "net_change": {"type": "currency"},
             "percent_change": {"type": "percentage"},
-            "contribution": {"type": "currency"}
+            "contribution": {"type": "bps"}
         }
     },
     "Other SKU Sales": {
@@ -109,7 +109,7 @@
             "period_values": {"type": "currency"},
             "net_change": {"type": "currency"},
             "percent_change": {"type": "percentage"},
-            "contribution": {"type": "currency"}
+            "contribution": {"type": "bps"}
         }
     },
     "Same SKU Ad Orders": {
@@ -139,7 +139,7 @@
             "period_values": {"type": "integer"},
             "net_change": {"type": "integer"},
             "percent_change": {"type": "percentage"},
-            "contribution": {"type": "currency"}
+            "contribution": {"type": "bps"}
         }
     }
 } 
