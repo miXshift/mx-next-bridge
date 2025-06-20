@@ -174,10 +174,10 @@ class VBridge:
 # Example usage and main execution
 if __name__ == '__main__':
     # Initialize VBridge with unified output disabled to generate individual files
-    vbridge = VBridge(output_dir='output', unified_output=False)
+    vbridge = VBridge(output_dir='vBridge/output', unified_output=False)
     
     # Define file path and date ranges for P1 and P2
-    csv_file_path = 'Hydrapak YTD - campaign.csv'
+    csv_file_path = 'vBridge/Hydrapak YTD - campaign.csv'
 
     # Define P1 and P2 date ranges (full months for MoM comparison)
     p1_start_date = '2025-01-01'

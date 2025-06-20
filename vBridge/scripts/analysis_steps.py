@@ -236,7 +236,6 @@ class Step1KPICalculation(AnalysisStep):
             p1_vals = p1_aligned[metric] if metric in p1_aligned.columns else pd.Series(0, index=all_campaigns)
             p2_vals = p2_aligned[metric] if metric in p2_aligned.columns else pd.Series(0, index=all_campaigns)
             net_change = p2_vals - p1_vals
-            # Avoid division by zero for % change
             pct_change = np.where(p1_vals != 0, (p2_vals - p1_vals) / p1_vals, 0)
             
             # For contribution, use the correct calculation based on bridge_type
@@ -246,84 +245,53 @@ class Step1KPICalculation(AnalysisStep):
             # Format contribution using config
             if 'formats' in kpi_format and 'contribution' in kpi_format['formats']:
                 contribution = contribution.apply(lambda x: self.config.format_value(x, kpi_format['formats']['contribution']))
-            else:
-                contribution = contribution.apply(lambda x: f"{x:+.2f}")
-            
-            # Format period values, net change, and % change
-            if 'formats' in kpi_format:
-                p1_vals_fmt = p1_vals.apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('period_values', {'type': 'decimal', 'decimals': 2})))
-                p2_vals_fmt = p2_vals.apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('period_values', {'type': 'decimal', 'decimals': 2})))
-                net_change_fmt = net_change.apply(lambda x: self.config.format_value(x, kpi_format['formats'].get('net_change', {'type': 'decimal', 'decimals': 2})))
-                pct_change_fmt = pct_change * 100
-                pct_change_fmt = pd.Series(pct_change_fmt, index=all_campaigns).apply(lambda x: self.config.format_value(x/100, kpi_format['formats'].get('percent_change', {'type': 'percentage'})))
-            else:
-                p1_vals_fmt = p1_vals
-                p2_vals_fmt = p2_vals
-                net_change_fmt = net_change
-                pct_change_fmt = pct_change
-            
-            # Store in data dict
-            data[(metric, p1_period_name)] = p1_vals_fmt
-            data[(metric, p2_period_name)] = p2_vals_fmt
-            data[(metric, 'Net Change')] = net_change_fmt
-            data[(metric, '% Change')] = pct_change_fmt
-            data[(metric, contribution_label)] = contribution
+
+            # Assign calculated values to the data dictionary
+            data[col_tuples[0]] = p1_vals.apply(lambda x: self.config.format_value(x, kpi_format.get('formats', {}).get('period_values', {'type': 'decimal'})))
+            data[col_tuples[1]] = p2_vals.apply(lambda x: self.config.format_value(x, kpi_format.get('formats', {}).get('period_values', {'type': 'decimal'})))
+            data[col_tuples[2]] = net_change.apply(lambda x: self.config.format_value(x, kpi_format.get('formats', {}).get('period_values', {'type': 'decimal'})))
+            data[col_tuples[3]] = [self.config.format_value(x, {'type': 'percentage'}) for x in pct_change]
+            data[col_tuples[4]] = contribution
         
-        # Build MultiIndex DataFrame
-        columns = pd.MultiIndex.from_tuples(columns)
-        comparison_df = pd.DataFrame(data, index=all_campaigns)
-        comparison_df = comparison_df.reindex(columns=columns)
+        # Create the DataFrame from the collected data
+        df = pd.DataFrame(data, index=all_campaigns)
         
-        # Add totals row if both totals exist
-        if not p1_totals_kpis.empty and not p2_totals_kpis.empty:
-            totals_row = {}
-            for metric in required_kpi_cols:
-                # P1, P2
-                p1_total = p1_totals_kpis.loc['TOTAL', metric] if metric in p1_totals_kpis.columns else 0
-                p2_total = p2_totals_kpis.loc['TOTAL', metric] if metric in p2_totals_kpis.columns else 0
-                net_change = p2_total - p1_total
-                pct_change = (net_change / p1_total) if p1_total != 0 else 0
-                
-                display_name = self.config.get_kpi_display_name(metric)
-                kpi_format = self.config.kpi_format.get(display_name, {})
-                
-                # Check if this metric uses basis points for contribution
-                uses_bps = (
-                    'formats' in kpi_format 
-                    and 'contribution' in kpi_format['formats']
-                    and kpi_format['formats']['contribution'].get('type') == 'bps'
-                )
-                contribution_label = 'Contribution (BPS)' if uses_bps else 'Contribution'
-                
-                # Format
-                if 'formats' in kpi_format:
-                    p1_total_fmt = self.config.format_value(p1_total, kpi_format['formats'].get('period_values', {'type': 'decimal', 'decimals': 2}))
-                    p2_total_fmt = self.config.format_value(p2_total, kpi_format['formats'].get('period_values', {'type': 'decimal', 'decimals': 2}))
-                    net_change_fmt = self.config.format_value(net_change, kpi_format['formats'].get('net_change', {'type': 'decimal', 'decimals': 2}))
-                    pct_change_fmt = self.config.format_value(pct_change, kpi_format['formats'].get('percent_change', {'type': 'percentage'}))
-                    contribution_fmt = self.config.format_value(net_change, kpi_format['formats'].get('contribution', {'type': 'decimal', 'decimals': 2}))
-                else:
-                    p1_total_fmt = p1_total
-                    p2_total_fmt = p2_total
-                    net_change_fmt = net_change
-                    pct_change_fmt = pct_change
-                    contribution_fmt = net_change
-                
-                totals_row[(metric, p1_period_name)] = p1_total_fmt
-                totals_row[(metric, p2_period_name)] = p2_total_fmt
-                totals_row[(metric, 'Net Change')] = net_change_fmt
-                totals_row[(metric, '% Change')] = pct_change_fmt
-                totals_row[(metric, contribution_label)] = contribution_fmt
+        # Append TOTAL row
+        total_data = {}
+        for metric in required_kpi_cols:
+            display_name = self.config.get_kpi_display_name(metric)
+            kpi_format = self.config.kpi_format.get(display_name, {})
             
-            # Add totals row
-            totals_series = pd.Series(totals_row, name='TOTAL')
-            comparison_df = pd.concat([comparison_df, totals_series.to_frame().T])
+            # Check if this metric uses basis points for contribution
+            uses_bps = (
+                'formats' in kpi_format
+                and 'contribution' in kpi_format['formats']
+                and kpi_format['formats']['contribution'].get('type') == 'bps'
+            )
+            contribution_label = 'Contribution (BPS)' if uses_bps else 'Contribution'
+            
+            p1_total = p1_totals_kpis.loc['TOTAL', metric]
+            p2_total = p2_totals_kpis.loc['TOTAL', metric]
+            net_change_total = p2_total - p1_total
+            pct_change_total = (p2_total - p1_total) / p1_total if p1_total != 0 else 0
+            
+            total_data[(metric, p1_period_name)] = p1_total
+            total_data[(metric, p2_period_name)] = p2_total
+            total_data[(metric, 'Net Change')] = net_change_total
+            total_data[(metric, '% Change')] = pct_change_total
+            total_data[(metric, contribution_label)] = net_change_total  # Use raw value for totals as well
         
-        return comparison_df
+        total_row = pd.DataFrame(total_data, index=['TOTAL'])
+        df = pd.concat([df, total_row])
+        
+        # Reorder columns to match the defined structure
+        df = df[columns]
+        
+        return df
     
     def _calculate_kpis(self, aggregated_df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculates all specified KPIs from an aggregated DataFrame.
+        Calculate all 14 KPIs from the aggregated base metrics
         KPIs: Spend, Total Ad Sales, ACoS, ROAS, Conversion Rate, Impressions, Clicks,
               Clickthrough Rate, Cost Per Click, Same SKU Ad Sales, Other SKU Sales, 
               Same SKU Ad Orders, Other SKU Ad Orders, Total Ad Orders.

@@ -13,7 +13,11 @@ import pandas as pd
 class ConfigManager:
     """Manages configuration and formatting for KPI analysis"""
     
-    def __init__(self):
+    def __init__(self, config_path: str = 'kpi_format.py'):
+        """
+        Initialize ConfigManager with the path to the KPI format config file.
+        """
+        self.config_path = config_path
         self.kpi_format = self._load_kpi_format()
         self._setup_column_mappings()
         self._setup_kpi_mappings()
@@ -21,14 +25,14 @@ class ConfigManager:
     def _load_kpi_format(self) -> Dict[str, Any]:
         """Load KPI format configuration from kpi_format.py"""
         try:
-            with open('kpi_format.py', 'r') as f:
+            with open(self.config_path, 'r') as f:
                 content = f.read()
                 start = content.find('{')
                 end = content.rfind('}') + 1
                 json_content = content[start:end]
                 return json.loads(json_content)
         except Exception as e:
-            print(f"Warning: Could not load kpi_format.py: {e}")
+            print(f"Warning: Could not load {self.config_path}: {e}")
             return {}
     
     def _setup_column_mappings(self):
@@ -71,10 +75,7 @@ class ConfigManager:
         
         if format_type == 'currency':
             decimals = format_spec.get('decimals', 2)
-            if value >= 0:
-                return f"${value:,.{decimals}f}"
-            else:
-                return f"-${abs(value):,.{decimals}f}"
+            return f"{value:.{decimals}f}"
         elif format_type == 'percentage':
             # Percentage as decimal format with 12 decimal places (e.g., 0.131000000000)
             return f"{value:.12f}"
