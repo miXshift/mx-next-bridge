@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 
 # Add the scripts directory to the path so we can import vBridge modules
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
     from vBridge import VBridge
@@ -303,6 +303,8 @@ def test_step4_acos_roas_handling():
         config = ConfigManager()
         processor = DataProcessor(config)
         step1 = Step1KPICalculation(config, test_output_dir)
+        step2 = Step2AbsoluteContributions(config, test_output_dir)
+        step3 = Step3MixRateContributions(config, test_output_dir)
         step4 = Step4AcosRoasInfinityHandling(config, test_output_dir)
         
         # Load and preprocess data
@@ -318,9 +320,23 @@ def test_step4_acos_roas_handling():
             full_df, p1_start, p1_end, p2_start, p2_end
         )
         
-        # Execute step 4
+        # Execute step 2 to get absolute contributions
+        absolute_contributions = step2.execute(
+            p1_kpis, p2_kpis, p1_totals, p2_totals,
+            p1_start, p1_end, p2_start, p2_end
+        )
+        
+        # Execute step 3 to get mix/rate contributions  
+        mix_rate_contributions = step3.execute(
+            p1_kpis, p2_kpis, p2_totals, p1_totals,
+            p1_start, p1_end, p2_start, p2_end
+        )
+        
+        # Execute step 4 with correct parameters
         final_acos_roas = step4.execute(
-            p1_kpis, p2_kpis, p1_totals, p2_totals
+            mix_rate_contributions, absolute_contributions,
+            p1_kpis, p2_kpis,
+            p1_start, p1_end, p2_start, p2_end
         )
         
         if final_acos_roas is None:

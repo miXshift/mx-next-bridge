@@ -10,8 +10,8 @@ import os
 import pandas as pd
 import numpy as np
 
-# Add the scripts directory to the path so we can import vBridge
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add the parent scripts directory to the path so we can import vBridge
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from vBridge import VBridge, ConfigManager, DataProcessor
 

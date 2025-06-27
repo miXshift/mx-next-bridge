@@ -14,7 +14,8 @@
     "vbridge:clean": "cd vBridge && find output -mindepth 1 -name '*.md' -prune -o -type f -delete && find output -mindepth 1 -type d -empty -delete",
     "vbridge:run": "cd vBridge && ./venv/bin/python3 scripts/vBridge.py",
     "vbridge:install": "cd vBridge && ./venv/bin/pip install -r requirements.txt",
-    "vbridge:full": "npm run vbridge:clean && npm run vbridge:run"
+    "vbridge:full": "npm run vbridge:clean && npm run vbridge:run",
+    "vbridge:test": "cd vBridge && ./venv/bin/python3 -m pytest scripts/tests/ -v"
 
   },
   "dependencies": {
