@@ -22,9 +22,9 @@
 # Add src to Python path
 export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
 
-# Or run from project root
+# Or run from project root (use current modular import)
 cd /path/to/vBridge
-python -c "from src.campaign_bridge_modular import CampaignBridge"
+python -c "from src.core.campaign_bridge_modular import CampaignBridge"
 ```
 
 **Problem**: `ModuleNotFoundError: No module named 'pandas'`
@@ -33,9 +33,6 @@ python -c "from src.campaign_bridge_modular import CampaignBridge"
 ```bash
 # Install required dependencies
 pip install pandas numpy
-
-# Or install from requirements file
-pip install -r requirements.txt
 ```
 
 ### File Path Issues
