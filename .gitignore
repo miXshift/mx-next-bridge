@@ -40,6 +40,155 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# vBridge output files
-vBridge/output/*
-!vBridge/output/README.md
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+env.bak/
+venv.bak/
+.venv/
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.sublime-*
+*.swp
+*.swo
+*~
+
+# Testing and coverage
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.pytest_cache/
+pytest_cache/
+*.cover
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.Spotlight-V100
+.Trashes
+
+# Security and secrets
+*.key
+*.cert
+*.crt
+secrets/
+credentials/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+tmp/
+temp/
+
+# Archive and backup files
+*.gz
+*.zip
+*.tar
+*.bak
+*.backup
+
+# Log files
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# v2Bridge Project Specific
+# =========================
+
+# Data directory - contains sensitive business data
+v2Bridge/data/
+!v2Bridge/data/.gitkeep
+!v2Bridge/data/README.md
+
+# Output directory - contains analysis results
+v2Bridge/output/
+!v2Bridge/output/.gitkeep
+!v2Bridge/output/README.md
+
+# Python virtual environment
+v2Bridge/venv/
+v2Bridge/.venv/
+
+# Python cache and compiled files
+v2Bridge/__pycache__/
+v2Bridge/**/__pycache__/
+v2Bridge/**/*.py[cod]
+v2Bridge/*$py.class
+
+# Testing and coverage
+v2Bridge/.pytest_cache/
+v2Bridge/.coverage
+v2Bridge/htmlcov/
+v2Bridge/.tox/
+
+# Logs
+v2Bridge/logs/
+v2Bridge/**/*.log
+
+# Temporary files
+v2Bridge/**/*.tmp
+v2Bridge/**/*.temp
+v2Bridge/**/.cache/
+
+# Business data patterns (extra safety)
+*_campaign*.csv
+*_delta_*.csv
+*_assignment_*.csv
+*Bridge*.xlsx
+*YTD*.csv
+*MoM*.xlsx
+*SPABridge*.xlsx
+
+# Archive files
+v2Bridge/**/*.gz
+v2Bridge/**/*.zip
+v2Bridge/**/*.tar
+v2Bridge/**/*.bak
+
+# Local configuration overrides
+v2Bridge/config/local_*.json
+v2Bridge/config/*.local.json
+
+# General data files (keep at end for clarity)
+*.csv
+*.xlsx
+*.xls
+*.docx
+*.doc

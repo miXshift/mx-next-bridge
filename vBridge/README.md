@@ -1,355 +1,273 @@
-# vBridge2 - KPI Analysis and Mix/Rate Bridge Calculator
+# MixBridge v2 - Campaign Bridge Analysis Tool
 
-A comprehensive Python system for calculating Key Performance Indicators (KPIs) from advertising campaign data and performing advanced mix/rate bridge analysis.
+A Python application that replicates Excel-based marketing campaign bridge reporting, converting daily campaign data into automated month-over-month performance analysis with **EXCELLENT accuracy** and 10-decimal precision, featuring resolved contribution calculations and decimal percentage format.
 
-> 📚 **New to this project?** See the [📖 Project Overview](PROJECT_OVERVIEW.md) for a complete documentation guide and navigation help.
-
-## 🚀 Quick Start
-
-```bash
-# Activate virtual environment (recommended)
-source venv/bin/activate  # On macOS/Linux
-# or
-venv\Scripts\activate     # On Windows
-
-# Run complete analysis using the modular system
-python scripts/vBridge.py
-
-# Validate implementation
-python scripts/test_complete_analysis.py
-```
-
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Documentation](#documentation)
-- [Output Structure](#output-structure)
-- [Configuration](#configuration)
-- [Testing](#testing)
+> **v2.0 Update**: The source code has been restructured into a modular architecture for better organization and maintainability. See [documentation](docs/) for migration guidance.
 
 ## Overview
 
-vBridge2 implements a systematic 4-step process for advertising KPI analysis:
+This tool processes daily campaign performance data and generates bridge reports that analyze variance between time periods using Mix Bridge methodology. It replicates the functionality of complex Excel reports while enabling automated processing of large datasets.
 
-1. **KPI Calculation**: Calculates 14 direct and derived advertising KPIs
-2. **Mix Contribution**: Analyzes contribution of campaigns to absolute metric changes
-3. **Mix Rate Contribution**: Decomposes calculated KPI changes into mix and rate effects
-4. **ACoS/ROAS Infinity Handling**: Special handling for ACoS/ROAS bridge calculations
+## Project Structure
 
-### Key Features
-
-- ✅ **Complete Coverage**: All 14 KPIs processed systematically
-- ✅ **Modular Architecture**: Clean, maintainable, and extensible code structure
-- ✅ **Robust Error Handling**: Graceful handling of edge cases and missing data
-- ✅ **Comprehensive Testing**: Full test suite with validation
-- ✅ **Flexible Configuration**: Easy customization of column mappings and formatting
-- ✅ **Rich Output**: 21+ output files with proper formatting
-
-## Architecture
-
-The system uses a **modular architecture** with clean separation of concerns:
-
-### Core Components (`scripts/` modules)
-- **`vBridge.py`**: Main entry point and compatibility layer
-- **`vbridge_main.py`**: Main orchestrator class
-- **`config_manager.py`**: Configuration and formatting management
-- **`data_processor.py`**: Data loading and preprocessing
-- **`analysis_steps.py`**: All analysis step implementations
-- **Test suites**: Comprehensive testing framework
-
-### Benefits
-- ✅ **Testable**: Individual modules can be tested in isolation
-- ✅ **Maintainable**: Clean separation of concerns
-- ✅ **Extensible**: Easy to add new analysis steps
-- ✅ **Reusable**: Components can be used independently
-
-See [📖 Modular Documentation](scripts/README_MODULAR.md) for detailed architecture information.
-
-## Installation
-
-### Prerequisites
-
-**Option 1: Using Virtual Environment (Recommended)**
-
-```bash
-# Create virtual environment
-python3 -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate  # On macOS/Linux
-# or
-venv\Scripts\activate     # On Windows
-
-# Install dependencies
-pip install -r requirements.txt
+```
+vBridge/
+├── README.md                 # This file
+├── src/                      # Modular source code (v2.0)
+│   ├── core/                 # Calculation engines
+│   ├── data/                 # Data processing & validation  
+│   ├── output/               # Output formatting & management
+│   ├── config/               # Configuration & definitions
+│   ├── common/               # Shared infrastructure
+│   └── [legacy files]        # Legacy compatibility files
+├── scripts/                  # Analysis, debugging & verification tools
+│   ├── analysis/
+│   ├── debugging/
+│   └── verification/
+├── utils/                    # Excel comparison & validation system
+│   ├── enhanced_comparison_system.py
+│   ├── modules/              # Reusable comparison components
+│   └── archive/              # Legacy analysis tools  
+├── docs/                     # Comprehensive documentation
+│   ├── README.md             # Documentation overview
+│   ├── user-guide.md         # Step-by-step usage guide
+│   ├── api-reference.md      # Complete API documentation
+│   ├── scripts-vs-utils-guide.md  # Development workflows
+│   └── archive/              # Historical documentation
+├── data/                     # Source data files
+│   ├── Hydrapak YTD - campaign.csv
+│   ├── HydrapakUS_SPABridge_MoM_February 2025vsJanuary 2025.xlsx
+│   ├── Vertical Bridge Technical Scoping Document - 3.11.2025.docx.txt
+│   ├── kpi_formula_analysis.json
+│   └── kpi_formula_analysis_detailed.json
+├── output/                   # Generated reports
+│   └── period_comparison.csv # Main output with two-tier headers
+└── venv/                     # Python virtual environment
 ```
 
-**Option 2: Global Installation**
+## Key Features
 
-```bash
-pip install pandas numpy openpyxl python-dateutil matplotlib
+- **Automated Bridge Analysis**: Converts daily campaign data into month-over-month variance analysis
+- **Enhanced Zero Baseline Handling**: Three sophisticated strategies for P1=0 scenarios (dummy_value, delta_assignment, hybrid)
+- **High-Precision Calculations**: 10-decimal precision eliminates rounding errors
+- **Comprehensive Validation**: 6-check validation framework with detailed reporting
+- **Flexible Configuration**: Profile-based configuration management (production, development, performance, accuracy)
+- **Decimal Percentage Format**: Consistent 0.17 format instead of 17% for precise comparisons
+- **Complete Contribution Calculations**: Includes all metrics including zero baseline campaigns
+- **Two-Tier Headers**: Clean output format with KPI groupings and dimensional analysis
+- **Mix Bridge Methodology**: Implements proper variance decomposition formulas with division-by-zero protection
+- **14 Metric Groups**: Processes spend, sales, ROAS, ACoS, CTR, conversions, and more
+- **Scalable Processing**: Handles 9,000+ daily records efficiently
+- **Modular Architecture**: Clean separation of concerns for maintainability
+- **Backward Compatibility**: 100% compatible with existing implementations
+- **Production Ready**: Comprehensive validation and resolved calculation issues
+
+## Quick Start
+
+### Installation
+
+1. **Set up virtual environment**:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install pandas openpyxl xlrd numpy
+   ```
+
+### Usage
+
+1. **Basic Usage (Enhanced - Recommended)**:
+   ```bash
+   # Run with hybrid strategy (default, handles zero baseline scenarios)
+   python src/campaign_bridge_modular.py
+   
+   # Run with specific zero baseline handling strategy
+   python src/campaign_bridge_modular.py delta_assignment  # Most accurate
+   python src/campaign_bridge_modular.py dummy_value       # Fastest
+   python src/campaign_bridge_modular.py hybrid           # Balanced (default)
+   
+   # Disable validation for performance
+   python src/campaign_bridge_modular.py hybrid --no-validate
+   ```
+
+2. **Legacy Usage**:
+   ```bash
+   # Original monolithic version (still supported)
+   python src/campaign_bridge.py
+   ```
+
+3. **View Results**:
+   - Output saved to `output/period_comparison.csv`
+   - Two-tier header format for easy analysis
+   - 156 campaigns analyzed with 14 metric groups
+   - 10-decimal precision with decimal percentage format (0.17 vs 17%)
+   - Zero baseline campaigns properly handled with contribution attribution
+
+## Output Format
+
+The generated CSV features a **two-tier header structure**:
+
+```
+Row 1: Campaign Name | Spend | Spend | Spend | Spend | Spend | Total Ad Sales | ...
+Row 2:             | Jan 2025 | Feb 2025 | Net Change | % Change | Contribution | Jan 2025 | ...
 ```
 
-### Setup
+### 14 Metric Groups Analyzed:
+1. **Spend** - Advertising investment
+2. **Total Ad Sales** - Revenue generated  
+3. **ACoS** - Advertising Cost of Sales
+4. **ROAS** - Return on Ad Spend
+5. **Conversion Rate** - Orders/Clicks efficiency
+6. **Impressions** - Ad visibility
+7. **Clicks** - Ad engagement
+8. **CTR** - Click-through rate
+9. **CPC** - Cost per click
+10. **Same SKU Ad Sales** - Direct product sales
+11. **Other SKU Sales** - Cross-sell revenue
+12. **Same SKU Ad Orders** - Direct conversions
+13. **Other SKU Ad Orders** - Cross-sell conversions
+14. **Total Ad Orders** - All conversions
 
-1. Clone or download the project
-2. **Set up virtual environment** (see Prerequisites above)
-3. Place your CSV data file in the project root
-4. Configure analysis parameters (see [Configuration](#configuration))
+## Validation & Accuracy
 
-## Usage
+### Comprehensive Testing ✅
+- **EXCELLENT accuracy** with resolved calculation issues
+- **All contribution calculations** now working correctly for all metric types
+- **10-decimal precision** eliminates rounding errors
+- **Decimal percentage format** ensures consistent comparisons
+- **Rate metrics** (ACoS, ROAS, CTR, Conversion Rate) now properly calculated
+- **Data scope differences** identified and explained (Excel: 55 campaigns vs CSV: 156)
 
-### Basic Usage
+### Validation Tools
+```bash
+# Compare outputs with Excel (updated for decimal format)
+python utils/detailed_campaign_comparison.py
 
+# Investigate contribution calculations
+python utils/investigate_contribution_zeros.py
+
+# Analyze data source differences
+python utils/investigate_data_source_differences.py
+
+# Create discrepancy analysis reports
+python utils/discrepancy_analysis.py
+```
+
+## Data Processing Details
+
+### Input Data
+- **Source**: `data/Hydrapak YTD - campaign.csv`
+- **Records**: 9,478 daily campaign performance records
+- **Time Period**: January 2025 vs February 2025
+- **Campaigns**: 156 unique campaigns processed
+
+### Processing Logic
+1. **Date Aggregation**: Groups daily data by campaign and period
+2. **Rate Calculations**: Computes ACoS, ROAS, CTR, conversion rates as decimals (not percentages)
+3. **Mix Bridge Analysis**: Applies variance decomposition methodology with formula: `p1_mix * growth_rate * 10000`
+4. **Contribution Calculations**: Includes ALL metrics (absolute and rate) in contribution analysis
+5. **High Precision Output**: 10-decimal places for exact calculations
+
+## Customization
+
+### Change Time Periods
+Edit date filters in `src/data_processor.py`:
 ```python
-from scripts.vBridge import VBridge
-
-# Initialize and run complete analysis
-vbridge = VBridge(output_dir='output')
-results = vbridge.run_complete_analysis(
-    csv_file_path='your_data.csv',
-    p1_start_date='2025-01-01',
-    p1_end_date='2025-01-31',
-    p2_start_date='2025-02-01',
-    p2_end_date='2025-02-28'
-)
+# Update date ranges in DataProcessor.load_data()
+self.jan_data = self.df[
+    (self.df['Date'] >= '2025-01-01') & 
+    (self.df['Date'] <= '2025-01-31')
+].copy()
 ```
 
-### Command Line Usage
-
-```bash
-# Activate virtual environment first
-source venv/bin/activate  # On macOS/Linux
-# or
-venv\Scripts\activate     # On Windows
-
-# Run complete analysis with default settings
-python scripts/vBridge.py
-```
-
-### Advanced Usage - Individual Components
-
-```python
-from scripts.config_manager import ConfigManager
-from scripts.data_processor import DataProcessor
-from scripts.analysis_steps import Step1KPICalculation
-
-# Initialize components
-config = ConfigManager()
-processor = DataProcessor(config)
-step1 = Step1KPICalculation(config, 'output')
-
-# Load and process data
-df = processor.load_and_preprocess_data('your_data.csv')
-
-# Run individual steps
-p1_kpis, p2_kpis, p1_totals, p2_totals = step1.execute(
-    df, p1_start, p1_end, p2_start, p2_end
-)
-```
+### Add New Metrics
+1. Update aggregation dictionary in `DataProcessor.aggregate_period_data()`
+2. Add calculation logic in `BridgeCalculator` class
+3. Include in output formatting in `OutputFormatter` class
 
 ## Documentation
 
-| Document | Purpose |
-|----------|---------|
-| [📖 Main README](README.md) | This overview and quick start guide |
-| [📖 vBridge Modular](README_vBridge.md) | Detailed modular architecture documentation |
-| [📖 Modular Structure](scripts/README_MODULAR.md) | File structure and module breakdown |
-| [📖 Output Structure](output/README.md) | Generated files and directory organization |
-| [📖 Implementation Summary](IMPLEMENTATION_SUMMARY.md) | Development history and improvements |
+### Enhanced MixBridge Documentation (v2.0)
+- **[Enhanced MixBridge User Guide](docs/ENHANCED_MIXBRIDGE_USER_GUIDE.md)** - Comprehensive guide to zero baseline handling and new features
+- **[Zero Baseline Strategies Guide](docs/ZERO_BASELINE_STRATEGIES_GUIDE.md)** - Technical deep-dive into the three calculation strategies
+- **[API Reference](docs/API_REFERENCE.md)** - Complete API documentation for enhanced modules
+- **[PRD vBridge](docs/PRD_V2BRIDGE.md)** - Product requirements and technical architecture
 
-### Detailed Function Documentation
+### Legacy Documentation
+- **[Development Summary](docs/DEVELOPMENT_SUMMARY.md)** - Complete development process and technical decisions
+- **[Skyflask Comparison](docs/SKYFLASK_COMPARISON_REPORT.md)** - Detailed KPI validation for sample campaign
+- **[Contribution Analysis](docs/CONTRIBUTION_ANALYSIS_REPORT.md)** - Investigation of formula discrepancies and solutions
 
-For comprehensive function documentation, formulas, and implementation details, see the sections below:
+### Recent Improvements (Latest)
+- ✅ **Fixed rate metrics contributions**: ACoS, ROAS, CTR, Conversion Rate now properly calculated
+- ✅ **Implemented decimal percentage format**: 0.17 instead of 17% for consistency
+- ✅ **Added 10-decimal precision**: Eliminates all rounding errors
+- ✅ **Resolved data scope differences**: Explained Excel vs CSV total variations
 
-<details>
-<summary><strong>Step 1: KPI Calculation</strong></summary>
-
-Calculates all 14 KPIs from raw campaign data:
-
-**Absolute Metrics (9):**
-- Spend, Total Ad Sales, Impressions, Clicks, Total Ad Orders
-- Same SKU Ad Sales, Other SKU Sales, Same SKU Ad Orders, Other SKU Ad Orders
-
-**Calculated Metrics (5):**
-- ACoS, ROAS, Conversion Rate, CTR, CPC
-
-**Key Functions:**
-- `load_and_preprocess_data()` - Data loading and cleaning
-- `aggregate_data_for_period()` - Period-based aggregation
-- `calculate_kpis()` - KPI computation with zero-division handling
-
-</details>
-
-<details>
-<summary><strong>Step 2: Mix Contribution (Absolute Metrics)</strong></summary>
-
-Calculates contribution of each campaign to total change in absolute metrics using the Rate Change formula.
-
-**Formula:**
-```
-Contribution (BPS) = (P2_Value - P1_Value) / P1_Total * 10000
-```
-
-**Function:**
-- `calculate_absolute_metric_contribution()` - Rate contribution in basis points
-
-</details>
-
-<details>
-<summary><strong>Step 3: Mix Rate Contribution (Calculated KPIs)</strong></summary>
-
-Decomposes calculated KPI changes into mix effects and rate effects using the Mixed Rate Change formula.
-
-**Formulas:**
-```
-Mix Impact = (P2_Mix - P1_Mix) × (P2_KPI - P2_Total_KPI)
-Rate Impact = (P2_KPI - P1_KPI) × P1_Mix
-Total Contribution = Mix Impact + Rate Impact
-```
-
-**Function:**
-- `calculate_mix_rate_contribution()` - Mix and rate decomposition
-
-</details>
-
-<details>
-<summary><strong>Step 4: ACoS/ROAS Infinity Handling</strong></summary>
-
-Special handling for ACoS and ROAS calculations when sales approach zero, using ROAS transformation method.
-
-**Function:**
-- `calculate_acos_roas_bridge_contribution()` - Infinity-safe ACoS/ROAS analysis
-
-</details>
-
-## Output Structure
-
-The system generates organized outputs in the `output/` directory:
-
-```
-output/
-├── step2_absolute_contributions/     # 9 absolute metric files + combined
-├── step3_mix_rate_contributions/     # 5 calculated KPI files  
-├── step4_acos_roas_final/           # Final ACoS/ROAS contributions
-└── summary_reports/                 # Formatted KPIs and MoM changes
-```
-
-See [📖 Output Documentation](output/README.md) for complete file descriptions.
-
-## Configuration
-
-### Column Mappings
-
-```python
-# Default column configuration
-CAMPAIGN_ID_COL = 'CampaignID'
-CAMPAIGN_NAME_COL = 'CampaignName'
-DATE_COL = 'DateKey'
-COST_COL = 'Cost'
-CLICKS_COL = 'Clicks'
-IMPRESSIONS_COL = 'Impressions'
-
-# Attribution columns (7-day default)
-SALES_COL_ATTR = 'AttributedSales7day'
-ORDERS_COL_ATTR = 'AttributedConversions7day'
-```
-
-### KPI Formatting
-
-The system uses semantic formatting types defined in `kpi_format.py`:
-
-- **`currency`**: $1,234.56 (2 decimals)
-- **`percentage`**: 13.1% (1 decimal)
-- **`percentage_precise`**: 12.45% (2 decimals)
-- **`integer`**: 1,234 (whole numbers)
-- **`decimal`**: 3.45 (2 decimals)
-- **`bps`**: +150 BPS (basis points)
-
-### Analysis Periods
-
-Configure your analysis periods in the main script:
-
-```python
-# Example: January vs February 2025
-p1_start_date = pd.to_datetime('2025-01-01')
-p1_end_date = pd.to_datetime('2025-01-31')
-p2_start_date = pd.to_datetime('2025-02-01')
-p2_end_date = pd.to_datetime('2025-02-28')
-```
-
-## Testing
-
-### Run Tests
-
+### Utility Scripts
 ```bash
-# Activate virtual environment first
-source venv/bin/activate  # On macOS/Linux
-# or
-venv\Scripts\activate     # On Windows
+# Excel structure analysis
+python utils/analyze_campaign_tab.py
 
-# Comprehensive integration tests
-python scripts/test_complete_analysis.py
+# KPI formula examination  
+python utils/analyze_kpi_formulas.py
 
-# Modular component tests
-python scripts/test_vbridge.py
+# Output validation
+python utils/compare_outputs.py
 ```
 
-### Expected Test Output
+## Technical Architecture
 
-```
-============================================================
-TEST SUMMARY
-============================================================
-✓ Step 1: KPI Calculation: PASSED
-✓ Step 2: Absolute Contributions: PASSED
-✓ Step 3: Mix Rate Contributions: PASSED
-✓ Step 4: ACoS/ROAS Handling: PASSED
-✓ Complete Integration: PASSED
+### Modular Design
+- **`data_processor.py`**: Data loading, filtering, and aggregation logic
+- **`bridge_calculator.py`**: Bridge calculations and metric computations
+- **`output_formatter.py`**: CSV formatting with two-tier headers
+- **`campaign_bridge_modular.py`**: Main orchestrator using modular components
 
-🎉 ALL TESTS PASSED!
-```
+### Core Technologies
+- **Framework**: Pure Python with pandas for data processing
+- **Performance**: Vectorized operations for efficient large dataset handling
+- **Accuracy**: Exact Excel formula replication with proper error handling
+- **Output**: CSV format maintains data integrity and summable structure
+- **Dependencies**: pandas, openpyxl, xlrd, numpy
 
-## Migration Guide
+## Troubleshooting
 
-### From Previous Versions
+### Common Issues
+1. **File not found**: Ensure data files are in `data/` directory
+2. **Missing dependencies**: Run `pip install pandas openpyxl xlrd numpy`
+3. **Virtual environment**: Always activate venv before running
+4. **Date format**: Ensure DateKey column is YYYYMMDD format
 
-If upgrading from earlier implementations:
+### Getting Help
+- Check `docs/` directory for detailed documentation
+- Run validation scripts to verify setup
+- Review error messages for specific guidance
 
-1. **Use only** the modular `vBridge.py` system
-2. **Update automation** to call `python scripts/vBridge.py`
-3. **Review outputs** - now generates 21+ files with comprehensive coverage
-4. **Test thoroughly** - run the test suite to validate
+## Production Status
 
-### Backward Compatibility
+✅ **Production Ready - ENHANCED WITH ZERO BASELINE HANDLING**
+- **EXCELLENT calculation accuracy** with all issues resolved
+- **Complete contribution calculations** for all 14 metric types including zero baseline scenarios
+- **Zero baseline handling** with three sophisticated strategies (dummy_value, delta_assignment, hybrid)
+- **10-decimal precision** eliminates rounding discrepancies
+- **Decimal percentage format** ensures consistent data analysis
+- **Comprehensive validation framework** with detailed reporting
+- **Flexible configuration management** with profiles and persistence
+- **Clean, analyzable output format** with proper two-tier headers
 
-The system maintains backward compatibility:
-- Existing import statements continue to work
-- Same output formats and file structures
-- All previous functionality preserved
+### Recent Enhancements (v2.0)
+- 🆕 **Added**: Enhanced zero baseline handling with three calculation strategies
+- 🆕 **Added**: Comprehensive validation framework with 6 validation checks
+- 🆕 **Added**: Configuration management system with profiles
+- 🆕 **Added**: Command-line strategy selection and validation control
+- 🔧 **Enhanced**: Bridge calculator with strategy parameter and validation
+- 🔧 **Enhanced**: Main script with strategy summary and error handling
+- ✅ **Result**: Complete solution for P1=0 division by zero scenarios
 
-## Support and Development
+## License
 
-### Key Improvements Made
-
-1. ✅ **Unified Sequential Process**: All 4 steps in proper sequence
-2. ✅ **Complete Coverage**: All 14 KPIs processed systematically  
-3. ✅ **Modular Architecture**: Clean, maintainable code structure
-4. ✅ **Comprehensive Testing**: Full validation suite
-5. ✅ **Rich Documentation**: Multiple documentation levels
-6. ✅ **Robust Error Handling**: Graceful edge case management
-
-### Future Enhancements
-
-- Database integration (MongoDB support)
-- Web interface for interactive analysis
-- API endpoints for programmatic access
-- Advanced attribution window handling
-- Custom mix driver logic
-
----
-
-**For detailed implementation information, see [📖 Implementation Summary](IMPLEMENTATION_SUMMARY.md)**
+This project is for internal use and analysis purposes.

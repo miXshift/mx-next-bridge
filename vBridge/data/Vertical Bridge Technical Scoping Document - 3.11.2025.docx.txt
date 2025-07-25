@@ -1,0 +1,123 @@
+﻿Technical Scoping Document – Vertical Bridge
+Scope
+The Vertical Bridge is a structured methodology for decomposing absolute and calculated performance metric shifts into their underlying drivers. This decomposition allows for precise attribution of changes across different hierarchical levels, for standard dimensions, such as Campaign Type, Match Type, Campaigns, Ad Groups, Keywords, Search Terms, ASINs, and Custom Dimensions, such as Item Group, Objective, or any other custom groupings allowed by the MixShift platform.
+The framework is designed to:
+1. Bridge percentage changes for absolute metrics (Mix Bridge).
+2. Explain both net change and % change for calculated metrics (MixRate Bridge).
+3. Handle edge cases such as denominator-driven infinity errors (MixRate Bridge for Infinity Errors).
+4. Bonus: Advanced Bridge Concept for Year over Year, Month over Month Bridging using MixRate Calculation and zero substitution method.
+________________
+
+
+Key Considerations
+1. We aim to standardize formulas to enable future data expansion beyond currently available advertising and operational datasets.  This ensures the framework remains adaptable, allowing for future expansion into new verticals and marketplaces by mapping existing formulas to emerging datasets.
+2. While Absolute Metrics can be summed from the underlying daily data, calculated metrics need to be post calculated rather than pulled from the data table directly.  E.g., Monthly Spend can be summed using the daily spend performance, where as Monthly ACOS must sum daily Spend and then divide by the sum of daily Sales.
+3. Processing speed can be a challenge as data size increases.  For example, Search Terms can extend into the tens of thousands which in our current app was handled by dropping the data into a download pane and processed in the back ground.
+4. We will want to enable users to download the bridge export in excel format as is done today but also process on the fly to represent directly in the platform.  E.g., In Report Center we have a table on page 2 showing Period over Period performance by dimension that currently shows % change and Net Change.  We aim to add Contribution to change as an additional metric.
+5. We intend to improve the bridging flexibility that currently exists in the platform.  
+   1. Specifically, we want to allow for bridging across all campaign types.  This will introduce challenges as the data sets are not 100% compatible.  E.g., Sponsored Brands (Headline Search) does not return ASIN values.  In these instances, we would want to include the data to ensure total values are as consistent as possible, but label said data a “NA” instead of a specific ASIN.
+   2. We also want to allow for custom data selections in both period 1 and period 2.  Standard bridges will be preset for Week-over-Week and Month-over-Month, but users should be able to bridge any two custom periods, even if the number of days differs. The system should normalize for period length mismatches where necessary.
+   3. We want to enable custom filtering, which does exist in the platform today, such as Bridge MoM performance where Search Terms include “XYZ”.  This will have implications for which Dimensions can be bridged based on data connectedness.  E.g., in this scenario, an ASIN bridge could not be calculated as Search Term is not reported at the ASIN level.
+   4. For operational data bridging, we have a future consideration around data quality as we are currently pulling ASIN level performance by day.  There is a limitation here in that if an ASIN did not see a conversion on that day, Amazon does not report Sessions values for that ASIN.  When aggregated, say to the monthly level, Sessions will be understated.  Where we to pull the operational performance for the full month (or week), Sessions will more closely match the total values for Detail page Sales and Traffic by date report.  The solve for this may be to continue to pull daily ASIN data, but then supplement with Weekly and Monthly pulls and switch the source data based on the time selection/comparison the user has defined.
+   5. For MixRate formulas, we will want to calculate and preserve the Mix impact, the Rate impact, and the Total impact.  This will allow us to further enhance the explanatory power by surfacing to users the contribution coming from changes in mix vs. changes in rate independently, in addition to the total impact.
+________________
+
+
+Bridge Calculations
+1. Mix Bridge – Absolute Metric Decomposition
+Definition: The Mix Bridge is used for absolute metrics (e.g., Spend, Sales, Clicks, Impressions) and calculates the percentage contribution in basis points of each of the underlying dimensions, to the overall percentage change in performance.  Absolute net changes are already reflected at the component level. The Mix Bridge instead focuses on how each component’s relative share has shifted by expressing contribution in basis points.
+Formula:
+Mix Impact = P1 Mix * Period over Period growth % *10000
+Where:
+P1 Mix = P1 ‘Sales’ for ‘ASIN X’ / ‘Total P1 Sales’
+Period over Period Growth = (P2 ‘ASIN X Sales’ / P1 ‘ASIN X Sales’ ) – 1
+Example Applications: OPS, Units, Sessions, Page Views, Ad Spend, Ad Sales, Impressions, Clicks, Same SKU Ad Sales, Other SKU Ad Sales, Ad Orders, Same SKU Ad Orders, Other SKU Ad Orders.
+________________
+
+
+2. MixRate Bridge – Calculated Metric Decomposition
+Definition: The MixRate Bridge is used for calculated metrics (e.g., ACOS, CPC, ROAS, ConvR) and decomposes changes into two distinct components before summing:
+1. Mix Contribution – The impact of distribution shifts across dimensions.
+2. Rate Contribution – The impact of changes in the metric itself.
+Note: The MixRate Bridge will primarily quantify Contribution to Net Change, ensuring clear attribution of performance shifts. An optional secondary layer may be added to express contributions in relative percentage terms, which we will evaluate as needed.
+Formula (using ASP as the example):
+Bridging Average Selling Price (ASP) where ASP = OPS/Units and Mix = Units/Total Units
+Mix Impact = (P2 Mix – P1 Mix) * (P2 ASP – P2 Total ASP)
+Rate Impact = (P2 ASP – P1 ASP) * P1 Mix
+Total Impact = Sum(Mix Impact, Rate Impact)
+Example Applications:
+ASP = OPS/Units where units is used to determine Mix and contribution to change is shown in the local currency (e.g. +/-$0.42)
+Conversion Rate (ConvR) AKA ‘Unit Session %’ = Units / Sessions where Sessions is used to determine Mix and Contribution to change is shown in basis points (requiring multiplying by 10000).
+Buy Box % where Page Views is used to determine Mix and Contribution to change is shown in basis points (requiring multiplying by 10000).
+Note: Total Buy Box % = sumproduct(Buy Box %, Page Views)/Sum(Page Views)
+ROAS = Ad Sales/Ad Spend, where Ad Spend is used to determine Mix and Contribution to change is shown in the local currency (e.g. +/-$0.42).
+Ad ConvR = Orders/Clicks where clicks is used to determine Mix and Contribution to change is shown in basis points (requiring multiplying by 10000).
+Click Through Rate (CTR) = Clicks / Impressions where Impressions is used to determine Mix and Contribution to Change is shown in basis points (requiring multiplying by 10000).
+Cost per Click (CPC) = Clicks / Spend where Spend is used to determine Mix and Contribution to Change is shown in the local currency (e.g. +/-$0.42).
+Cost per Acquisition (CPA) = Spend/Total Orders where Total Orders is used to determine Mix and Contribution to Change is shown in the local currency (e.g. +/-$0.42).
+Average Order Value = Total Ad Sales / Total Orders where Total Orders is used to determine Mix and Contribution to Change is shown in the local currency (e.g. +/-$0.42).
+Total ROAS (TROAS) = Total OPS / Advertising Spend where Advertising Spend is used to determine Mix and Contribution to Change is shown in the local currency (e.g. +/-$0.42).
+________________
+
+
+3. MixRate Bridge for Infinity Errors
+Definition: Certain calculated metrics, such as ACOS (Ad Spend / Sales Revenue) and Total ACOS (Ad Spend / Total OPS), can produce infinity errors when the denominator is zero. The MixRate Bridge for Infinity Errors is designed to prevent undefined calculations by applying a structured allocation approach by routing through the inverse of the formula.
+Formula (using ACOS as the example, and ROAS as the inverse):
+1. Bridging ROAS where ROAS = Ad Sales / Ad Spend and Ad Spend is used to determine Mix and Contribution to Change is shown in the local currency (e.g. +/-$0.42).
+   1. Mix Impact = (P2 Mix – P1 Mix) * (P2 ROAS – P2 Total ROAS)
+   2. Rate Impact = (P2 ROAS – P1 ROAS) * P1 Mix
+2. Once ROAS Mix and Rate contributions are calculated, they are transformed back into ACOS contributions. The relative impact is expressed as a percentage of total ROAS change and then applied to the observed ACOS shift. For example, a -$0.17 decrease in ROAS corresponds to a 100 bps increase in ACOS, ensuring stable attribution despite denominator shifts.  For the underlying dimensions, we take the ROAS contribution to Change, divided by the Total ROAS Change, and then multiply by the Total ACOS Change.  
+   1. Using Real numbers, Keyword X contributed -$0.05 to the -$0.17 decrease in ROAS.  Thus -$0.05/-$0.17 = +29.1664114%.  +29.1664114%*+100bps = +29bps for the ACOS Contribution to Change for Keyword X.
+   2. This calculation is performed for both Rate and Mix independently and then summed to achieve the total impact.
+Additional Example Applications:
+Total ACOS (TACOS), using Total ROAS (TROAS) where TROAS = Total OPS/Total Ad Spend where Advertising Spend is used to determine Mix and Contribution to Change is shown in the local currency (e.g. +/-$0.42) for TROAS, and basis points for TACOS.
+________________
+
+
+Advanced Bridge Concept: Year over Year, Month over Month Bridge using Mix Rate Calculation and zero substitution method
+Definition: There is a use case we’ve yet to cover where users are looking to explain shifts in their Year over Year performance, Month over Month. For example, a business may be entering a peak season where MoM performance is ramping strongly, which could hide degradations in performance from a YoY perspective.  E.g., Last month Sales were up +50% YoY, and despite being up +70% MoM, the YoY performance has degraded to +30% this month from +50% last month.
+Note: This concept will experience Infinity Errors which cannot be solved through taking the reciprocal as was done for ACOS, as there can be performance data of Zero in both period 1 and period 2.  E.g., An ASIN may not have existed in Last Year P1 or P2 but does exist in P1 and P2 this year.  Thus, the YoY growth will result in Infinity errors.  To date this has been solved by replacing 0 for last year’s data with a nominal, non-zero value.  This unfortunately produces outsized impacts to Rate and Mix breakouts, and in this case, we would not publish the independent Rate/Mix contributions, only the Total Contribution.  
+The primary use case for this Bridge is for Units and Ordered Product Sales, so we will limit the scope to those Metrics for the time being.  We may revisit if a more elegant solution can be developed.
+When Year-over-Year (YoY) or Month-over-Month (MoM) data contains missing or zero values, a Nominal Placeholder Substitution method ensures calculations remain stable. This prevents outsized Mix/Rate distortions by replacing zeros with a statistically appropriate, non-zero reference value.
+Formula (using YoY MoM Units Growth % as the example):
+Mix Impact = (P2 YoY Unit Growth % – Total P2 YoY Unit Growth %) * (P2 TY Mix – P2 TY Mix) * 10000
+Rate Impact = (P2 YoY Unit Growth % – P1 YoY Unit Growth %) * P1 TY Mix * 10000
+Total Impact = Sum(Mix Impact, Rate Impact)
+
+
+________________
+
+
+ADDENDUM: Concept for Handling Newly Introduced ASINs in YoY/MoM Bridging without using substitution method
+A unique challenge in Year-over-Year (YoY) and Month-over-Month (MoM) bridging is properly attributing performance changes when ASINs or other entities did not exist in one or both periods in the prior year but now exist in the current period. Standard bridging methodologies rely on a baseline comparison, but when an ASIN has no prior-year presence, traditional methods can:
+1. Distort mix share for existing ASINs, over-allocating contributions to products with historical data.
+2. Introduce artificial placeholders for missing prior-year values, leading to inaccurate rate impact calculations.
+To resolve this, we apply a Normalized Contribution Method, which:
+* Maintains standard MixRate Bridge calculations for ASINs that existed in both P1 LY and P2 LY.
+* Treats ASINs that did not exist in P1 LY or P2 LY but now exist in both P1 TY and P2 TY as net new mix effects.
+* Uses a partial bridge calculation for ASINs that existed in P2 LY but not in P1 LY (or vice versa), applying mix attribution only for the period where the ASIN existed.
+* Ensures total mix still sums to 100%, so new ASINs do not artificially inflate or distort existing attribution calculations.
+ A table with text and green ticks
+
+AI-generated content may be incorrect. 
+
+
+
+In other words:
+* If an ASIN existed in both LY and TY for the same periods, we calculate its mix and rate effect as the difference in its share of total volume between the two periods. 
+* If an ASIN only exists in TY P1 and TY P2 but had no prior presence in LY, we attribute its contribution entirely as a net new mix effect without adjusting LY P2 values artificially. 
+* If an ASIN existed in LY but is no longer present in TY, it is excluded from calculations, as its mix/rate contribution is already zero. 
+* If an ASIN existed only in P2 LY but not P1 LY, we calculate its mix effect only for P2, without artificially adjusting P1 TY. 
+* If an ASIN existed in P1 LY, disappeared in P2 LY, but was reintroduced in TY P1 and P2, it follows standard bridging in P1, while P2 reflects a reintroduction effect.
+
+
+Key Takeaways
+✅ We are not excluding newly introduced ASINs from the YoY explanation—instead, they are handled separately as net new mix effects.
+✅ If an ASIN existed only in P2 LY, we calculate its mix effect only for P2, without artificially adjusting P1.
+✅ The MixRate Bridge is only applied where historical comparisons are valid, ensuring stability in calculations.
+✅ Total mix still sums to 100%, ensuring that the introduction of new ASINs does not distort mix allocation for existing ASINs.
+✅ If an ASIN reappears after missing one period, the bridge calculation applies to the period of reintroduction.
+
+
+Final Thought
+This approach ensures that expanding ASIN catalogs, newly launched campaigns, or phased product rollouts do not distort performance attribution while maintaining the standard Rate/Mix Bridge structure for entities with full historical data. It allows the YoY/MoM bridging methodology to adapt dynamically to evolving product catalogs without introducing artificial biases or placeholder values.

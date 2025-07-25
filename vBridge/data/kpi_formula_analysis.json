@@ -1,0 +1,469 @@
+{
+  "p1_campaign_kpis": {
+    "formulas": {},
+    "headers": {
+      "A": "CampaignName",
+      "B": "Spend",
+      "C": "Total Ad Sales",
+      "D": "ACoS",
+      "E": "ROAS",
+      "F": "Conversion Rate",
+      "G": "Impressions",
+      "H": "Clicks",
+      "I": "CTR",
+      "J": "CPC",
+      "K": "Same SKU Ad Sales",
+      "L": "Other SKU Sales",
+      "M": "Same SKU Ad Orders",
+      "N": "Other SKU Ad Orders",
+      "O": "Total Ad Orders"
+    },
+    "dimensions": "Rows: 1000, Columns: 26"
+  },
+  "p2_campaign_kpis": {
+    "formulas": {
+      "B1": {
+        "formula": "=SUM(B4:B56)",
+        "column_header": "=SUM(B4:B56)"
+      },
+      "C1": {
+        "formula": "=SUM(C4:C56)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "E1": {
+        "formula": "=SUM(E4:E56)",
+        "column_header": "=SUM(E4:E56)"
+      },
+      "C4": {
+        "formula": "=VLOOKUP(A4,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D4": {
+        "formula": "=C4-B4",
+        "column_header": "No header"
+      },
+      "C5": {
+        "formula": "=VLOOKUP(A5,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D5": {
+        "formula": "=C5-B5",
+        "column_header": "No header"
+      },
+      "C6": {
+        "formula": "=VLOOKUP(A6,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D6": {
+        "formula": "=C6-B6",
+        "column_header": "No header"
+      },
+      "C7": {
+        "formula": "=VLOOKUP(A7,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D7": {
+        "formula": "=C7-B7",
+        "column_header": "No header"
+      },
+      "C8": {
+        "formula": "=VLOOKUP(A8,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D8": {
+        "formula": "=C8-B8",
+        "column_header": "No header"
+      },
+      "C9": {
+        "formula": "=VLOOKUP(A9,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D9": {
+        "formula": "=C9-B9",
+        "column_header": "No header"
+      },
+      "C10": {
+        "formula": "=VLOOKUP(A10,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D10": {
+        "formula": "=C10-B10",
+        "column_header": "No header"
+      },
+      "C11": {
+        "formula": "=VLOOKUP(A11,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D11": {
+        "formula": "=C11-B11",
+        "column_header": "No header"
+      },
+      "C12": {
+        "formula": "=VLOOKUP(A12,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D12": {
+        "formula": "=C12-B12",
+        "column_header": "No header"
+      },
+      "C13": {
+        "formula": "=VLOOKUP(A13,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D13": {
+        "formula": "=C13-B13",
+        "column_header": "No header"
+      },
+      "C14": {
+        "formula": "=VLOOKUP(A14,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D14": {
+        "formula": "=C14-B14",
+        "column_header": "No header"
+      },
+      "C15": {
+        "formula": "=VLOOKUP(A15,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D15": {
+        "formula": "=C15-B15",
+        "column_header": "No header"
+      },
+      "C16": {
+        "formula": "=VLOOKUP(A16,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D16": {
+        "formula": "=C16-B16",
+        "column_header": "No header"
+      },
+      "C17": {
+        "formula": "=VLOOKUP(A17,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D17": {
+        "formula": "=C17-B17",
+        "column_header": "No header"
+      },
+      "C18": {
+        "formula": "=VLOOKUP(A18,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D18": {
+        "formula": "=C18-B18",
+        "column_header": "No header"
+      },
+      "C19": {
+        "formula": "=VLOOKUP(A19,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D19": {
+        "formula": "=C19-B19",
+        "column_header": "No header"
+      },
+      "C20": {
+        "formula": "=VLOOKUP(A20,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D20": {
+        "formula": "=C20-B20",
+        "column_header": "No header"
+      },
+      "C21": {
+        "formula": "=VLOOKUP(A21,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D21": {
+        "formula": "=C21-B21",
+        "column_header": "No header"
+      },
+      "C22": {
+        "formula": "=VLOOKUP(A22,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D22": {
+        "formula": "=C22-B22",
+        "column_header": "No header"
+      },
+      "C23": {
+        "formula": "=VLOOKUP(A23,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D23": {
+        "formula": "=C23-B23",
+        "column_header": "No header"
+      },
+      "C24": {
+        "formula": "=VLOOKUP(A24,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D24": {
+        "formula": "=C24-B24",
+        "column_header": "No header"
+      },
+      "C25": {
+        "formula": "=VLOOKUP(A25,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D25": {
+        "formula": "=C25-B25",
+        "column_header": "No header"
+      },
+      "C26": {
+        "formula": "=VLOOKUP(A26,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D26": {
+        "formula": "=C26-B26",
+        "column_header": "No header"
+      },
+      "C27": {
+        "formula": "=VLOOKUP(A27,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D27": {
+        "formula": "=C27-B27",
+        "column_header": "No header"
+      },
+      "C28": {
+        "formula": "=VLOOKUP(A28,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D28": {
+        "formula": "=C28-B28",
+        "column_header": "No header"
+      },
+      "C29": {
+        "formula": "=VLOOKUP(A29,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D29": {
+        "formula": "=C29-B29",
+        "column_header": "No header"
+      },
+      "C30": {
+        "formula": "=VLOOKUP(A30,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D30": {
+        "formula": "=C30-B30",
+        "column_header": "No header"
+      },
+      "C31": {
+        "formula": "=VLOOKUP(A31,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D31": {
+        "formula": "=C31-B31",
+        "column_header": "No header"
+      },
+      "C32": {
+        "formula": "=VLOOKUP(A32,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D32": {
+        "formula": "=C32-B32",
+        "column_header": "No header"
+      },
+      "C33": {
+        "formula": "=VLOOKUP(A33,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D33": {
+        "formula": "=C33-B33",
+        "column_header": "No header"
+      },
+      "C34": {
+        "formula": "=VLOOKUP(A34,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D34": {
+        "formula": "=C34-B34",
+        "column_header": "No header"
+      },
+      "C35": {
+        "formula": "=VLOOKUP(A35,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D35": {
+        "formula": "=C35-B35",
+        "column_header": "No header"
+      },
+      "C36": {
+        "formula": "=VLOOKUP(A36,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D36": {
+        "formula": "=C36-B36",
+        "column_header": "No header"
+      },
+      "C37": {
+        "formula": "=VLOOKUP(A37,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D37": {
+        "formula": "=C37-B37",
+        "column_header": "No header"
+      },
+      "C38": {
+        "formula": "=VLOOKUP(A38,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D38": {
+        "formula": "=C38-B38",
+        "column_header": "No header"
+      },
+      "C39": {
+        "formula": "=VLOOKUP(A39,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D39": {
+        "formula": "=C39-B39",
+        "column_header": "No header"
+      },
+      "C40": {
+        "formula": "=VLOOKUP(A40,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D40": {
+        "formula": "=C40-B40",
+        "column_header": "No header"
+      },
+      "C41": {
+        "formula": "=VLOOKUP(A41,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D41": {
+        "formula": "=C41-B41",
+        "column_header": "No header"
+      },
+      "C42": {
+        "formula": "=VLOOKUP(A42,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D42": {
+        "formula": "=C42-B42",
+        "column_header": "No header"
+      },
+      "C43": {
+        "formula": "=VLOOKUP(A43,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D43": {
+        "formula": "=C43-B43",
+        "column_header": "No header"
+      },
+      "C44": {
+        "formula": "=VLOOKUP(A44,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D44": {
+        "formula": "=C44-B44",
+        "column_header": "No header"
+      },
+      "C45": {
+        "formula": "=VLOOKUP(A45,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D45": {
+        "formula": "=C45-B45",
+        "column_header": "No header"
+      },
+      "C46": {
+        "formula": "=VLOOKUP(A46,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D46": {
+        "formula": "=C46-B46",
+        "column_header": "No header"
+      },
+      "C47": {
+        "formula": "=VLOOKUP(A47,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D47": {
+        "formula": "=C47-B47",
+        "column_header": "No header"
+      },
+      "C48": {
+        "formula": "=VLOOKUP(A48,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D48": {
+        "formula": "=C48-B48",
+        "column_header": "No header"
+      },
+      "C49": {
+        "formula": "=VLOOKUP(A49,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D49": {
+        "formula": "=C49-B49",
+        "column_header": "No header"
+      },
+      "C50": {
+        "formula": "=VLOOKUP(A50,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D50": {
+        "formula": "=C50-B50",
+        "column_header": "No header"
+      },
+      "C51": {
+        "formula": "=VLOOKUP(A51,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D51": {
+        "formula": "=C51-B51",
+        "column_header": "No header"
+      },
+      "C52": {
+        "formula": "=VLOOKUP(A52,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D52": {
+        "formula": "=C52-B52",
+        "column_header": "No header"
+      },
+      "C53": {
+        "formula": "=VLOOKUP(A53,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D53": {
+        "formula": "=C53-B53",
+        "column_header": "No header"
+      },
+      "C54": {
+        "formula": "=VLOOKUP(A54,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D54": {
+        "formula": "=C54-B54",
+        "column_header": "No header"
+      },
+      "C55": {
+        "formula": "=VLOOKUP(A55,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D55": {
+        "formula": "=C55-B55",
+        "column_header": "No header"
+      },
+      "C56": {
+        "formula": "=VLOOKUP(A56,Campaign!$A:$F,3,0)",
+        "column_header": "=SUM(C4:C56)"
+      },
+      "D56": {
+        "formula": "=C56-B56",
+        "column_header": "No header"
+      }
+    },
+    "headers": {
+      "B": "=SUM(B4:B56)",
+      "C": "=SUM(C4:C56)",
+      "E": "=SUM(E4:E56)"
+    },
+    "dimensions": "Rows: 1000, Columns: 26"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-07-18T16:18:48.544419",
+  "excel_file": "data/HydrapakUS_SPABridge_MoM_February 2025vsJanuary 2025.xlsx",
+  "csv_file": "output/analyses/mixbridge_jan2025-feb2025_delta_20250718_153220.csv",
+  "campaign_coverage": {
+    "excel_campaigns": 56,
+    "csv_campaigns": 157,
+    "common_campaigns": 56,
+    "coverage_rate": 35.6687898089172,
+    "excel_only": 0,
+    "csv_only": 101
+  },
+  "total_metrics": {
+    "error": "No metrics successfully compared"
+  },
+  "sample_campaigns": {
+    "sample_size": 0,
+    "pass_count": 0,
+    "pass_rate": 0,
+    "campaign_results": []
+  }
+}
