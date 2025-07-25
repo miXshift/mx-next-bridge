@@ -49,8 +49,8 @@ output_df = orchestrator.apply_to_dataframe(
 ## Installation
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (pandas and numpy are the main requirements)
+pip install pandas numpy
 
 # Run tests
 python -m pytest tests/
