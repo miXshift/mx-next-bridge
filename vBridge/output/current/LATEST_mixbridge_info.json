@@ -1,0 +1,16 @@
+{
+  "analysis_type": "mixbridge",
+  "created": "2025-07-21T22:14:27.329291",
+  "strategy": "delta_assignment",
+  "periods": {
+    "p1": "jan2025",
+    "p2": "feb2025"
+  },
+  "total_campaigns": 156,
+  "file_size": 105689,
+  "timestamped_file": "mixbridge_jan2025-feb2025_delta_assignment_20250721_221427.csv",
+  "previous_file": "PREVIOUS_mixbridge.csv",
+  "strategy_used": "delta_assignment",
+  "metrics_analyzed": 14,
+  "data_source": "data/Hydrapak YTD - campaign.csv"
+}

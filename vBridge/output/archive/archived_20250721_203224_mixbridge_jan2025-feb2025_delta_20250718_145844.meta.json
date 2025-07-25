@@ -1,0 +1,48 @@
+{
+  "analysis_type": "mixbridge",
+  "created": "2025-07-18T14:58:44.332513",
+  "csv_file": "mixbridge_jan2025-feb2025_delta_20250718_145844.csv",
+  "periods": {
+    "p1": "jan2025",
+    "p2": "feb2025"
+  },
+  "strategy": "delta_assignment",
+  "configuration": {
+    "zero_baseline_strategy": "hybrid",
+    "dummy_value": 1e-07,
+    "precision_decimals": 12,
+    "validation_tolerance": 1e-06,
+    "enable_audit_trail": true,
+    "mathematical_validation": true,
+    "debug_mode": false,
+    "output_precision": 2,
+    "percentage_as_decimal": true,
+    "enable_parallel_processing": false,
+    "chunk_size": 1000,
+    "output_naming": {
+      "base_directory": "output",
+      "use_subdirectories": true,
+      "subdirectories": {
+        "analyses": "analyses",
+        "reports": "reports",
+        "archive": "archive",
+        "latest": "latest"
+      },
+      "include_strategy": true,
+      "include_timestamp": true,
+      "timestamp_format": "%Y%m%d_%H%M%S",
+      "period_separator": "-",
+      "component_separator": "_",
+      "create_latest_links": true,
+      "archive_older_files": true,
+      "max_files_per_directory": 100,
+      "archive_age_days": 30,
+      "generate_metadata": true,
+      "compress_archived": true
+    }
+  },
+  "strategy_used": "delta_assignment",
+  "total_campaigns": 156,
+  "metrics_analyzed": 14,
+  "data_source": "data/Hydrapak YTD - campaign.csv"
+}

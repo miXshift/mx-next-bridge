@@ -1,0 +1,13 @@
+{
+  "zero_baseline_strategy": "hybrid",
+  "dummy_value": 1e-07,
+  "precision_decimals": 12,
+  "validation_tolerance": 1e-06,
+  "enable_audit_trail": true,
+  "mathematical_validation": true,
+  "debug_mode": false,
+  "output_precision": 2,
+  "percentage_as_decimal": true,
+  "enable_parallel_processing": false,
+  "chunk_size": 1000
+}

@@ -1,0 +1,101 @@
+{
+  "p1_campaign_kpis": {
+    "formulas": {},
+    "headers": {
+      "A": "CampaignName",
+      "B": "Spend",
+      "C": "Total Ad Sales",
+      "D": "ACoS",
+      "E": "ROAS",
+      "F": "Conversion Rate",
+      "G": "Impressions",
+      "H": "Clicks",
+      "I": "CTR",
+      "J": "CPC",
+      "K": "Same SKU Ad Sales",
+      "L": "Other SKU Sales",
+      "M": "Same SKU Ad Orders",
+      "N": "Other SKU Ad Orders",
+      "O": "Total Ad Orders"
+    },
+    "column_mappings": {},
+    "aggregation_rules": {},
+    "dimensions": "Rows: 1000, Columns: 26"
+  },
+  "p2_campaign_kpis": {
+    "formulas": {},
+    "headers": {
+      "A": "CampaignName",
+      "B": "Spend",
+      "E": "Total Ad Sales",
+      "F": "ACoS",
+      "G": "ROAS",
+      "H": "Conversion Rate",
+      "I": "Impressions",
+      "J": "Clicks",
+      "K": "CTR",
+      "L": "CPC",
+      "M": "Same SKU Ad Sales",
+      "N": "Other SKU Sales",
+      "O": "Same SKU Ad Orders",
+      "P": "Other SKU Ad Orders",
+      "Q": "Total Ad Orders"
+    },
+    "column_mappings": {
+      "B": {
+        "header": "Spend",
+        "formula_count": 1,
+        "unique_patterns": 1,
+        "sample_formulas": [
+          "=SUM(B4:B56)"
+        ]
+      },
+      "C": {
+        "header": "No header",
+        "formula_count": 54,
+        "unique_patterns": 2,
+        "sample_formulas": [
+          "=SUM(C4:C56)",
+          "=VLOOKUP(A4,Campaign!$A:$F,3,0)",
+          "=VLOOKUP(A5,Campaign!$A:$F,3,0)"
+        ]
+      },
+      "D": {
+        "header": "No header",
+        "formula_count": 53,
+        "unique_patterns": 1,
+        "sample_formulas": [
+          "=C4-B4",
+          "=C5-B5",
+          "=C6-B6"
+        ]
+      },
+      "E": {
+        "header": "Total Ad Sales",
+        "formula_count": 1,
+        "unique_patterns": 1,
+        "sample_formulas": [
+          "=SUM(E4:E56)"
+        ]
+      }
+    },
+    "aggregation_rules": {
+      "B1": {
+        "formula": "=SUM(B4:B56)",
+        "column": "B",
+        "header": "Spend"
+      },
+      "C1": {
+        "formula": "=SUM(C4:C56)",
+        "column": "C",
+        "header": "No header"
+      },
+      "E1": {
+        "formula": "=SUM(E4:E56)",
+        "column": "E",
+        "header": "Total Ad Sales"
+      }
+    },
+    "dimensions": "Rows: 1000, Columns: 26"
+  }
+}
