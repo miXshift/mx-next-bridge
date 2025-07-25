@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import warnings
 from datetime import datetime
+from pathlib import Path
 
 warnings.filterwarnings('ignore')
 
@@ -403,15 +404,59 @@ class CampaignBridge:
         return data_df, top_headers, sub_headers
     
     def save_to_csv(self, output_path):
-        """Save the bridge data to CSV format with two-tier headers"""
+        """Save the bridge data to CSV format with unique filename"""
         if self.bridge_data is None:
             raise ValueError("No bridge data to save. Run calculate_bridge() first.")
         
-        # Add timestamp to filename
-        timestamp = datetime.now().strftime("%H%M")  # Military time format HHMM
-        base_path = output_path.rsplit('.', 1)[0]  # Remove extension
-        extension = output_path.rsplit('.', 1)[1] if '.' in output_path else 'csv'
-        timestamped_path = f"{base_path}_{timestamp}.{extension}"
+        # Use unique output manager for better file management
+        try:
+            from ..output.unique_manager import get_unique_output_manager
+            unique_manager = get_unique_output_manager()
+            
+            # Format to get data and headers
+            data_df, top_headers, sub_headers = self.format_output_to_excel_structure()
+            
+            # Extract analysis type and periods from existing data
+            analysis_type = 'mixbridge'
+            periods = None
+            
+            # Try to extract periods from data if columns exist
+            date_cols = [col for col in data_df.columns if ' - ' in col and any(month in col for month in ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'])]
+            if len(date_cols) >= 2:
+                # Extract periods from column names
+                period_names = list(set([col.split(' - ')[1] for col in date_cols]))
+                if len(period_names) >= 2:
+                    period_names.sort()  # Sort to ensure consistent ordering
+                    periods = {'p1': period_names[0], 'p2': period_names[1]}
+            
+            # Save using unique manager
+            unique_path, latest_path, previous_path = unique_manager.save_analysis(
+                data=data_df,
+                analysis_type=analysis_type,
+                periods=periods,
+                strategy='campaign_bridge',
+                metadata={
+                    'original_output_path': output_path,
+                    'total_campaigns': len(data_df) - 1 if len(data_df) > 0 and 'Total' in str(data_df.iloc[-1, 0]) else len(data_df),
+                    'metrics_count': len([col for col in data_df.columns if col != 'Campaign']),
+                    'has_two_tier_headers': True
+                }
+            )
+            
+            print(f"✅ Analysis saved with unique filename:")
+            print(f"   Unique file: {Path(unique_path).name}")
+            print(f"   Latest file: {Path(latest_path).name}")
+            if previous_path:
+                print(f"   Previous file: {Path(previous_path).name}")
+            
+            return unique_path
+            
+        except ImportError:
+            # Fallback to original timestamp-based naming
+            timestamp = datetime.now().strftime("%H%M")  # Military time format HHMM
+            base_path = output_path.rsplit('.', 1)[0]  # Remove extension
+            extension = output_path.rsplit('.', 1)[1] if '.' in output_path else 'csv'
+            timestamped_path = f"{base_path}_{timestamp}.{extension}"
         
         # Format to get data and headers
         data_df, top_headers, sub_headers = self.format_output_to_excel_structure()

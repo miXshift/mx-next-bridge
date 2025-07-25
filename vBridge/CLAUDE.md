@@ -30,4 +30,6 @@
 
 - Use /utils for Excel comparisons and production validation, /scripts for debugging and ad-hoc analysis (see docs/scripts-vs-utils-guide.md)
 
-- MixBridge v2 uses clean modular architecture: import from src.core.*src.data.* src.output.*src.config.* src.common.* or use package-level imports like "from src import BridgeCalculator, MetricDefinitions" for convenience
+- MixBridge v2 uses clean modular architecture: import from src.core.*src.data.* src.output.*src.config.* src.common.* or use package-level imports like "from src import BridgeCalculator, KPI_BRIDGE_MAPPINGS" for convenience
+
+- Legacy metrics system has been removed (commit #XXX) - use bridge_mappings.py KPI_BRIDGE_MAPPINGS for all metric configurations. Do not reference old MetricDefinitions class or metrics.py as these are deprecated.

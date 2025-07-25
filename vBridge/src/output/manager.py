@@ -17,12 +17,17 @@ import os
 
 try:
     from ..common.logger import get_logger
+    from .unique_manager import UniqueOutputManager, get_unique_output_manager
 except ImportError:
     # Backwards compatibility during migration
     try:
         from .logger import get_logger
+        from .unique_manager import UniqueOutputManager, get_unique_output_manager
     except ImportError:
         from logger import get_logger
+        # Fallback if unique manager not available
+        UniqueOutputManager = None
+        get_unique_output_manager = None
 
 logger = get_logger(__name__)
 
@@ -64,8 +69,14 @@ class ImprovedOutputConfig:
 class ImprovedOutputManager:
     """Enhanced output manager with clearer file identification and archiving"""
     
-    def __init__(self, config: Optional[ImprovedOutputConfig] = None):
+    def __init__(self, config: Optional[ImprovedOutputConfig] = None, use_unique_names: bool = True):
         self.config = config or ImprovedOutputConfig()
+        self.use_unique_names = use_unique_names
+        self.unique_manager = None
+        
+        if self.use_unique_names and get_unique_output_manager is not None:
+            self.unique_manager = get_unique_output_manager()
+        
         self._setup_directories()
         
     def _setup_directories(self):
@@ -91,6 +102,17 @@ class ImprovedOutputManager:
         """
         logger.info(f"Saving {analysis_type} analysis with {len(data)} rows")
         
+        # Use unique manager if available and enabled
+        if self.use_unique_names and self.unique_manager is not None:
+            return self.unique_manager.save_analysis(
+                data=data,
+                analysis_type=analysis_type,
+                periods=periods,
+                strategy=strategy,
+                metadata=metadata
+            )
+        
+        # Fallback to original implementation
         # Archive existing latest file first
         self._archive_current_latest(analysis_type)
         

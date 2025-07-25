@@ -18,6 +18,7 @@
 
 ### System Features
 - **[Output System](system/output-system.md)** - File management
+- **[Unique Filename System](unique-filename-system.md)** - Unique file naming and organization
 - **[CLI Tools](system/cli-reference.md)** - Command-line tools
 - **[Configuration](system/configuration.md)** - Configuration options
 - **[Performance](system/performance.md)** - Optimization guidelines
@@ -31,6 +32,8 @@
 - **[FAQ](faq.md)** - Frequently asked questions
 - **[Troubleshooting](troubleshooting.md)** - Common issues
 - **[Methodology](mixrate-bridge-methodology.md)** - Mathematical methodology & percent change aggregation
+- **[CPA/AOV Test Report](test_report_cpa_aov.md)** - CPA and AOV integration test results
+- **[Data Requirements](data_requirements_verification.md)** - Data dependency verification
 
 ## Quick Reference
 

@@ -11,22 +11,43 @@ from typing import Dict, List, Optional, Tuple, Union
 import logging
 
 try:
-    from ..config.metrics import MetricDefinitions
+    from ..config.bridge_mappings import KPI_BRIDGE_MAPPINGS
     from ..common.logger import get_logger
     from ..common.exceptions import CalculationError, ValidationError
     from ..config.constants import BASIS_POINTS_MULTIPLIER, ZERO_TOLERANCE
 except ImportError:
     # Backwards compatibility during migration
     try:
-        from .metric_definitions import MetricDefinitions
+        from .bridge_mappings import KPI_BRIDGE_MAPPINGS
         from .logger import get_logger
         from .exceptions import CalculationError, ValidationError
         from .constants import BASIS_POINTS_MULTIPLIER, ZERO_TOLERANCE
     except ImportError:
-        from metric_definitions import MetricDefinitions
+        from bridge_mappings import KPI_BRIDGE_MAPPINGS
         from logger import get_logger
         from exceptions import CalculationError, ValidationError
         from constants import BASIS_POINTS_MULTIPLIER, ZERO_TOLERANCE
+
+
+# Compatibility layer for legacy MetricDefinitions usage
+class MetricDefinitions:
+    """Compatibility layer using bridge mappings"""
+    
+    @staticmethod
+    def get_all_metrics():
+        return list(KPI_BRIDGE_MAPPINGS.keys())
+    
+    @staticmethod
+    def get_absolute_metrics():
+        from ..models.bridge_types import BridgeType
+        return [metric for metric, config in KPI_BRIDGE_MAPPINGS.items() 
+                if config.bridge_type == BridgeType.MIX_BRIDGE]
+    
+    @staticmethod
+    def get_rate_metrics():
+        from ..models.bridge_types import BridgeType
+        return [metric for metric, config in KPI_BRIDGE_MAPPINGS.items() 
+                if config.bridge_type in [BridgeType.MIXRATE_BRIDGE, BridgeType.MIXRATE_INFINITY]]
 
 logger = get_logger(__name__)
 

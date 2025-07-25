@@ -27,6 +27,8 @@ Scripts for verifying calculation results and mathematical consistency:
 - `verify_all_contributions.py` - Validates contribution calculations
 - `verify_mixrate_bridge.py` - Verifies MixRate Bridge implementation
 - `totals_comparison.py` - Compares total row calculations
+- `test_cpa_aov_integration.py` - Tests CPA and AOV KPI integration
+- `test_cpa_aov_calculation.py` - Tests CPA and AOV calculation accuracy
 
 ### Root Scripts
 - `demo_improved_output.py` - Demonstrates improved output formatting

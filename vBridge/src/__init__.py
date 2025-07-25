@@ -11,7 +11,7 @@ Modular MixBridge calculation engine with organized modules:
 
 Example Usage:
     from src.core.bridge_calculator import BridgeCalculator
-    from src.config.metrics import MetricDefinitions
+    from src.config.bridge_mappings import KPI_BRIDGE_MAPPINGS
     from src.data.processor import OptimizedDataProcessor
 """
 
@@ -23,7 +23,7 @@ from .core.campaign_bridge_modular import CampaignBridge
 from .data.validator import MixBridgeValidator
 from .data.processor import OptimizedDataProcessor
 from .data.utils import safe_divide, calculate_rate_metric
-from .config.metrics import MetricDefinitions
+from .config.bridge_mappings import KPI_BRIDGE_MAPPINGS, get_bridge_configuration
 from .config.settings import MixBridgeConfig
 from .config.constants import BASIS_POINTS_MULTIPLIER, ZERO_TOLERANCE
 from .output.formatter import OutputFormatter
@@ -45,7 +45,7 @@ __all__ = [
     # Data processing
     'MixBridgeValidator', 'OptimizedDataProcessor', 'safe_divide', 'calculate_rate_metric',
     # Configuration
-    'MetricDefinitions', 'MixBridgeConfig', 'BASIS_POINTS_MULTIPLIER', 'ZERO_TOLERANCE',
+    'KPI_BRIDGE_MAPPINGS', 'get_bridge_configuration', 'MixBridgeConfig', 'BASIS_POINTS_MULTIPLIER', 'ZERO_TOLERANCE',
     # Output management
     'OutputFormatter', 'EnhancedOutputFormatter', 'ImprovedOutputManager',
     # Common utilities
