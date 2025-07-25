@@ -270,7 +270,7 @@ legacy_calculator.save_bridge_analysis(
 ### With Campaign Bridge
 
 ```python
-from src.core.campaign_bridge_modular import CampaignBridge
+from src.core.campaign_bridge import main as campaign_bridge_main
 
 # Replace the contribution calculation part
 def enhanced_campaign_bridge():

@@ -196,8 +196,8 @@ One-off investigation?
 ### Daily Development Workflow
 
 ```bash
-# 1. Run MixBridge calculations using current modular system
-python -c "from src.core.campaign_bridge_modular import CampaignBridge; bridge = CampaignBridge('data.csv'); result = bridge.generate_bridge()"
+# 1. Run MixBridge calculations
+python src/enhanced_mixbridge_calculator.py
 
 # 2. Quick verification of results
 python scripts/verification/verify_all_contributions.py

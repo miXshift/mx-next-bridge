@@ -30,4 +30,4 @@
 
 - Use /utils for Excel comparisons and production validation, /scripts for debugging and ad-hoc analysis (see docs/scripts-vs-utils-guide.md)
 
-- MixBridge v2 uses clean modular architecture: import from src.core.*src.data.* src.output.*src.config.* src.common.* or use package-level imports like "from src import BridgeCalculator, MetricDefinitions" for convenience
+- MixBridge v2 uses clean modular architecture: import from src.core.* src.data.* src.output.* src.config.* src.common.* or use package-level imports like "from src import BridgeCalculator, MetricDefinitions" for convenience
