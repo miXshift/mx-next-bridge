@@ -1,0 +1,17 @@
+{
+  "analysis_type": "mixbridge",
+  "created": "2025-07-25T16:48:34.984759",
+  "strategy": "test_unique_system",
+  "periods": {
+    "p1": "January 2025",
+    "p2": "February 2025"
+  },
+  "session_id": "095cc7a0",
+  "sequence_number": 3,
+  "unique_filename": "mixbridge_January 2025-February 2025_test_unique_system_20250725_164834_095cc7a0_seq003.csv",
+  "total_campaigns": 3,
+  "file_size": 297,
+  "latest_file": "LATEST_mixbridge.csv",
+  "previous_file": null,
+  "test_run": 3
+}
