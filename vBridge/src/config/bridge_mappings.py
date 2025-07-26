@@ -46,7 +46,7 @@ METRIC_FORMULAS: Dict[str, MetricFormula] = {
         numerator="Spend",
         denominator="Total Ad Orders"
     ),
-    "Average Order Value": MetricFormula(
+    "AOV": MetricFormula(
         numerator="Total Ad Sales",
         denominator="Total Ad Orders"
     ),
@@ -201,7 +201,7 @@ KPI_BRIDGE_MAPPINGS: Dict[str, BridgeConfiguration] = {
         mix_determinant="Total Ad Orders",
         contribution_unit=ContributionUnit.CURRENCY
     ),
-    "Average Order Value": BridgeConfiguration(
+    "AOV": BridgeConfiguration(
         bridge_type=BridgeType.MIXRATE_BRIDGE,
         mix_determinant="Total Ad Orders",
         contribution_unit=ContributionUnit.CURRENCY

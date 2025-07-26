@@ -18,6 +18,7 @@
 
 ### System Features
 - **[Output System](system/output-system.md)** - File management
+- **[Unique Filename System](unique-filename-system.md)** - Unique file naming and organization
 - **[CLI Tools](system/cli-reference.md)** - Command-line tools
 - **[Configuration](system/configuration.md)** - Configuration options
 - **[Performance](system/performance.md)** - Optimization guidelines
